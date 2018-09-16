@@ -8,7 +8,7 @@
 # object files and binaries
 
 /src/level_editor
-/src/*.O
+/src/*.o
 /src/*.ppu
 
 # shell scripts

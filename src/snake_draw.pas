@@ -1,5 +1,5 @@
 {
-     ---SNAKE_DRAW.PAS
+     --- SNAKE_DRAW.PAS
 
      --- CRT_SNAKE ---
 console arcade game on free Pascal
@@ -19,9 +19,18 @@ USES
 {$I crt_snake.inc}
 
 CONST
+
+{ one cell size in symbols }
+
   CellWidth=2;
 
 TYPE
+
+{ decart screen position }
+
+  ScrPos=record
+    Col,Row:Word
+  end;
 
   CellString=string[CellWidth];
 
@@ -31,6 +40,7 @@ TYPE
   end;
 
 CONST
+
   imgEmpty = '::';
   imgBrick = '[]';
   imgFruit = 'OO';

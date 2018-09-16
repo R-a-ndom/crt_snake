@@ -14,9 +14,7 @@ INTERFACE
 
 
 USES
-  CRT;
-
-{$I crt_snake.inc}
+  CRT,Snake_Draw,Editor_Unit;
 
 TYPE
 

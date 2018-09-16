@@ -13,9 +13,6 @@ Program LevelEditor;
 
 USES
   CRT,Snake_Draw,Editor_Unit,Editor_Menu;
-
-{ $I crt_snake.inc }
-
 VAR
   EditedLevel:GameField;
   CursorPos:ScrPos;
@@ -73,6 +70,6 @@ BEGIN
           WriteStatusLine;
         end;
     end; { case }
-  until ProgramState<>mnuExit;
+  until ProgramState=mnuExit;
   ClrScr;
 END.

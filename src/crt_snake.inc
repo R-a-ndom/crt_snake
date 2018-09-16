@@ -5,8 +5,8 @@ console arcade game on Free Pascal
 using CRT unit
 
  - base types and constants
- including to INTERFACE section
-}
+ including to INTERFACE section }
+
 {$ifndef CRT_SNAKE_INC}
 {$define CRT_SNAKE_INC}
 
@@ -30,46 +30,34 @@ CONST
 
 TYPE
 
-{
-  field cell values
-}
 
-CellValue=( clEmpty,  {empty cell}
-            clBrick,  {brick cell}
-            clFriut,  {friut - for growing}
-            clCoin,   {coin - for score}
-            clBody,   {snake's body}
-            clHead ); {snake's head}
-{
-  game field array
-}
+{ field cell values }
 
+  CellValue=( clEmpty,  {empty cell}
+              clBrick,  {brick cell}
+              clFriut,  {friut - for growing}
+              clCoin,   {coin - for score}
+              clBody,   {snake's body}
+              clHead ); {snake's head}
 
-GameField=array[0..FieldHeight,0..FieldWidth] of CellValue;
+{ game field array }
 
-{
-  menu selection items
-}
+  GameField=array[0..FieldHeight,0..FieldWidth] of CellValue;
 
-MenuSelection = ( mnuBeginGame,     { MAIN - begin game }
-                  mnuShowHighScore, { MAIN - show high score screen }
-                  mnuResume,        { PAUSE,EDITOR - resume game/editing }
-                  mnuExitToMainMenu,{ PAUSE - exit to main menu}
-                  mnuExit,          { ALL - exit}
-                  mnuEdNavForward,  { EDITOR - navigation : forward }
-                  mnuEdNavBackward, { EDITOR - navigation : backward }
-                  mnuEdNew,         { EDITOR - new level }
-                  mnuEdReplace,     { EDITOR - save level : replace }
-                  mnuEdInsert,      { EDITOR - save level : insert }
-                  mnuEdDelete,      { EDITOR - delete level }
-                  mnuEdMvForward,   { EDITOR - move level : forward }
-                  mnuEdMvBackward); { EDITOR - move level : backward }
-{
-  decart screen position
-}
+{ menu selection items }
 
-ScrPos=record
-  Col,Row:Word
-end;
+  MenuSelection = ( mnuBeginGame,     { MAIN - begin game }
+                    mnuShowHighScore, { MAIN - show high score screen }
+                    mnuResume,        { PAUSE,EDITOR - resume game/editing }
+                    mnuExitToMainMenu,{ PAUSE - exit to main menu}
+                    mnuExit,          { ALL - exit}
+                    mnuEdNavForward,  { EDITOR - navigation : forward }
+                    mnuEdNavBackward, { EDITOR - navigation : backward }
+                    mnuEdNew,         { EDITOR - new level }
+                    mnuEdReplace,     { EDITOR - save level : replace }
+                    mnuEdInsert,      { EDITOR - save level : insert }
+                    mnuEdDelete,      { EDITOR - delete level }
+                    mnuEdMvForward,   { EDITOR - move level : forward }
+                    mnuEdMvBackward); { EDITOR - move level : backward }
 
 {$endif}

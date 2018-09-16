@@ -5,27 +5,23 @@
 console arcade game on Free Pascal
 using CRT unit
 
-Level editor unit
-
-}
+Level editor uni }
 
 UNIT Editor_Unit;
 
+
 INTERFACE
+
 
 Uses
   CRT,Snake_draw;
-
-{$I crt_snake.inc}
 
 const
 
 StatusString=
   '  | ARROWS - move cursor | SPACE - draw/erase brick | ESC - editor menu |';
-{
-  procedures and functions
-}
 
+{ procedures and functions }
 
 Procedure CreateEmptyLevel(var A:GameField);
 
