@@ -1,0 +1,17 @@
+# CRT_SNAKE 
+# GIT ignoring file
+
+# all info files
+
+*.txt
+
+# object files and binaries
+
+/src/level_editor
+/src/*.O
+/src/*.ppu
+
+# shell scripts
+
+/**/*.sh
+
