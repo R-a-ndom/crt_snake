@@ -2,11 +2,18 @@
 
 # CRT_SNAKE building script
 
+debug_key="-g -dDEBUG"
+
 write_promt() {
   echo "Please, choose a number:"
-  echo "[    1    ] - Building a game"
-  echo "[    2    ] - Building a level editor"
-  echo "[    3    ] - Deleting an object files and binaries"
+  echo "[    1    ] - Building a game - DEBUG edition"
+  echo "[    2    ] - Building a level editor - DEBUG edition"
+  echo
+  echo "[    3    ] - Building a game - RELEASE edition"
+  echo "[    4    ] - Building a level editor - RELEASE edition"
+  echo
+  echo "[    5    ] - Deleting object files and binaries"
+  echo
   echo '[ Any key ] - exit'
 }
 
@@ -16,17 +23,25 @@ read -n 1 confirm
 echo
 case $confirm in
 
-# building a game
+# DEBUG - building a game
 
-  1) fpc crt_snake.pas ;;
+  1) fpc $debug_key crt_snake.pas ;;
 
-# building a level editor
+# DEBUG - building a level editor
 
-  2) fpc -olevel_editor editor_main.pas ;;
+  2) fpc $debug_key -olevel_editor editor_main.pas ;;
+
+# RELEASE - building a game
+
+  3) fpc crt_snake.pas ;;
+
+# RELEASE - building a level editor
+
+  4) fpc -olevel_editor editor_main.pas ;;
 
 # deleting compilation results
 
-  3)
+  5)
     echo -e "Deleting following files:\n"
     echo $(ls *.o)
     echo $(ls *.ppu)

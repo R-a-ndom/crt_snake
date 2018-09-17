@@ -42,7 +42,7 @@ TYPE
 
 { game field array }
 
-  GameField=array[0..FieldHeight,0..FieldWidth] of CellValue;
+  GameField=array[0..FieldWidth,0..FieldHeight] of CellValue;
 
 { menu selection items }
 

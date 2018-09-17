@@ -84,7 +84,7 @@ IMPLEMENTATION
 
 Procedure CursorOut;
 begin
-  GotoXY(ScreenWidth-1,1);
+  GotoXY(ScreenWidth,1);
 end;
 
 Procedure DrawFieldBorder;
@@ -99,7 +99,8 @@ begin
   begin
     GotoXY(Field_LeftUp.Col - CellWidth,Field_LeftUp.Row + i);
     Write(imgBrick);
-    GotoXY(Field_LeftUp.Col + (FieldWidth + 1)*CellWidth , Field_LeftUp.Row + i);
+    GotoXY(Field_LeftUp.Col + (FieldWidth + 1)*CellWidth ,
+                                        Field_LeftUp.Row + i);
     Write(imgBrick);
   end;
 

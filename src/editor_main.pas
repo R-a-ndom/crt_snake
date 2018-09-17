@@ -43,6 +43,8 @@ BEGIN
 
   repeat
     sym:=ReadKey;
+    if sym=#0 then
+      sym:=ReadKey;
     case sym of
       kbdUp:  { UP key }
         if CursorPos.Row>0 then
@@ -68,9 +70,13 @@ BEGIN
         end;
       kbdESC: { enter to EDITOR MENU }
         begin
+{$ifdef DEBUG}
+          DrawLevel(EditedLevel);
+{$endif}
           ProgramState:=EditorMenu;
           WriteUnactiveMenu;
           WriteHintLine(MainHintLine);
+          DrawOneCell(EditedLevel,CursorPos,true);
         end;
     end; { case }
     WriteStatusLine(CursorPos,Changed);

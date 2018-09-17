@@ -76,8 +76,8 @@ Procedure CreateEmptyLevel(var A:GameField);
 var
   i,j:Word;
 begin
-  for i:=0 to FieldHeight do
-   for j:=0 to FieldWidth do
+  for i:=0 to FieldWidth do
+   for j:=0 to FieldHeight do
      A[i,j]:=clEmpty;
 end;
 
@@ -102,11 +102,17 @@ var
 begin
   TextBackground(edcol_MainBG);
   TextColor(edcol_MainText);
-  for i:=0 to FieldHeight do 
+  for i:=0 to FieldHeight do
   begin
     GotoXY(Field_LeftUp.Col,Field_LeftUp.Row+i);
     for j:=0 to FieldWidth do
-      Write(Cell2String(A[i,j]));
+    begin
+      if A[j,i]=clBrick then
+        TextColor(edcol_FieldBrick)
+      else
+        TextColor(edcol_MainText);
+      Write(Cell2String(A[j,i]));
+    end;
   end;
 end;
 
@@ -127,6 +133,8 @@ begin
 end;
 
 Procedure DrawOneCell(var A:GameField; CellPos:ScrPos ; Selected:Boolean);
+var
+  AbsPos:ScrPos;
 begin
   if Selected then
     TextBackground(edcol_FieldCursor)
@@ -136,7 +144,9 @@ begin
     TextColor(edcol_MainText)
   else
     TextColor(edcol_FieldBrick);
-  GotoXY(ScreenCol(CellPos.Col),ScreenRow(CellPos.Row));
+  AbsPos.Col:=ScreenCol(CellPos.Col);
+  AbsPos.Row:=ScreenRow(CellPos.Row);
+  GotoXY(AbsPos.Col,AbsPos.Row);
   Write(Cell2String(A[CellPos.Col,CellPos.Row]));
 end;
 
