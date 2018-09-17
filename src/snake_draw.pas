@@ -41,6 +41,15 @@ TYPE
 
 CONST
 
+{ MS_DOS and Windows CMD screen size }
+
+{$ifdef WIN_DOS}
+
+  ScreenWidth=80;
+  ScreenHeight=25;
+
+{$endif}
+
   imgEmpty = '::';
   imgBrick = '[]';
   imgFruit = 'OO';

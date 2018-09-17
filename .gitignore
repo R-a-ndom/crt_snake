@@ -11,7 +11,4 @@
 /src/*.o
 /src/*.ppu
 
-# shell scripts
-
-/**/*.sh
 
