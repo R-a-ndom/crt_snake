@@ -13,63 +13,68 @@ Program LevelEditor;
 
 USES
   CRT,Snake_Draw,Editor_Unit,Editor_Menu;
+
 VAR
   EditedLevel:GameField;
   CursorPos:ScrPos;
   sym:Char;
   ProgramState:MenuSelection;
+  Changed:Boolean;
+
 BEGIN
+
+{ editor initialisation }
+
   ClrScr;
-  TextColor(Green);
+  TextColor(edcol_FieldBrick);
   DrawFieldBorder;
+  WriteUnactiveMenu;
+  WriteHintLine(MainHintLine);
   CreateEmptyLevel(EditedLevel);
   DrawLevel(EditedLevel);
   CursorPos.Row:=0;
   CursorPos.Col:=0;
+  Changed:=false;
   DrawOneCell(EditedLevel,CursorPos,true);
+  WriteStatusLine(CursorPos,Changed);
   CursorOut;
+
+{ main loop }
+
   repeat
     sym:=ReadKey;
     case sym of
-      kbdUp:
+      kbdUp:  { UP key }
         if CursorPos.Row>0 then
-          begin
-            MoveCursor(EditedLevel,CursorPos,0,-1); 
-            CursorOut;
-          end;
-      kbdDown:
+          MoveCursor(EditedLevel,CursorPos,0,-1);
+
+      kbdDown: { DOWN key}
         if CursorPos.Row<FieldHeight then
-          begin
             MoveCursor(EditedLevel,CursorPos,0,1);
-            CursorOut;
-          end;
-      kbdLeft:
+
+      kbdRight: { RIGHT key}
         if CursorPos.Col<FieldWidth then
-          begin
             MoveCursor(EditedLevel,CursorPos,1,0);
-            CursorOut;
-          end;
-      kbdRight:
+
+      kbdLeft: { LEFT key }
         if CursorPos.Col>0 then
-          begin
             MoveCursor(EditedLevel,CursorPos,-1,0);
-            CursorOut;
-          end;
-      kbdSpace:
+
+      kbdSpace: { drawing / erasing bricks }
         begin
-          if EditedLevel[CursorPos.Col,CursorPos.Row]=clBrick then
-            EditedLevel[CursorPos.Col,CursorPos.Row]:=clBrick
-          else
-            EditedLevel[CursorPos.Col,CursorPos.Row]:=clEmpty;
-          DrawOneCell(EditedLevel,CursorPos,true);
-          CursorOut;
+          ChangeCellUnderCursor(EditedLevel,CursorPos);
+          if not Changed then
+            Changed:=true;
         end;
-      kbdESC:
+      kbdESC: { enter to EDITOR MENU }
         begin
           ProgramState:=EditorMenu;
-          WriteStatusLine;
+          WriteUnactiveMenu;
+          WriteHintLine(MainHintLine);
         end;
     end; { case }
+    WriteStatusLine(CursorPos,Changed);
+    CursorOut;
   until ProgramState=mnuExit;
   ClrScr;
 END.

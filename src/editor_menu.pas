@@ -27,38 +27,52 @@ TYPE
 
 CONST
 
-  MenuStart:ScrPos=( Col:5 ; Row:1 );
+  MenuStart:ScrPos=( Col:3 ; Row:1 );
 
-  MenuMax=9;
+  EditorMenuMax=9;
 
-  EditorMenuContent:array[1..MenuMax] of MenuItem  =
-  ((Text:'<--';            Value:mnuEdNavBackward),
-   (Text:'-->';            Value:mnuEdNavForward),
-   (Text:'NEW';            Value:mnuEdNew),
-   (Text:'SAVE | REPLACE'; Value:mnuEdReplace),
-   (Text:'SAVE | INSERT';  Value:MnuEdInsert),
-   (Text:'DELETE';         Value:mnuEdDelete),
-   (Text:'<== MOVE';       Value:mnuEdMvBackward),
-   (Text:'MOVE ==>';       Value:mnuEdMvForward),
-   (Text:'EXIT';           Value:mnuExit));
+  EditorMenuContent:array[1..EditorMenuMax] of MenuItem  =
+  ((Text:'<-';     Value:mnuEdNavBackward),
+   (Text:'->';     Value:mnuEdNavForward),
+   (Text:'NEW';         Value:mnuEdNew),
+   (Text:'SAVE<>REPLACE'; Value:mnuEdReplace),
+   (Text:'SAVE<>INSERT';  Value:MnuEdInsert),
+   (Text:'DELETE';      Value:mnuEdDelete),
+   (Text:'MOVE <=';     Value:mnuEdMvBackward),
+   (Text:'MOVE =>';     Value:mnuEdMvForward),
+   (Text:'EXIT';        Value:mnuExit));
 
-  MenuUnselMark='  ';
-  MenuSelBeginMark='[ ';
-  MenuSelEndMark=' ] ';
+  MenuUnselMark=' ';
+  MenuSelBeginMark='[';
+  MenuSelEndMark=']';
+
+Procedure WriteUnactiveMenu;
 
 Function EditorMenu:MenuSelection;
 
 IMPLEMENTATION
 
+Procedure WriteUnactiveMenu;
+var
+  i:Word;
+begin
+  TextBackground(edcol_MainBG);
+  TextColor(edcol_MenuUnactive);
+  GotoXY(MenuStart.Col,MenuStart.Row);
+  For i:=1 to EditorMenuMax do
+    Write(MenuUnselMark,EditorMenuContent[i].Text,MenuUnselMark);
+end;
+
+
 Procedure WriteMenuItem(Item:String;Selected:Boolean);
 begin
   if Selected then
   begin
-    TextColor(Yellow);
+    TextColor(edcol_MenuSelItem);
     Write(MenuSelBeginMark);
   end else
   begin
-    TextColor(LightGray);
+    TextColor(edcol_MenuUnselItem);
     Write(MenuUnselMark);
   end;
   Write(Item);
@@ -72,12 +86,22 @@ Procedure WriteAllMenu(MenuPos:Word);
 var
   i:Word;
 begin
+  i:=1;
+  TextBackground(edcol_MainBG);
   GotoXY(MenuStart.Col,MenuStart.Row);
-  For i:=1 to MenuPos do
+  While i<MenuPos do
+  begin
     WriteMenuItem(EditorMenuContent[i].Text,false);
-  Write(EditorMenuContent[MenuPos].Text,true);
-  For i:=MenuPos+1 to MenuMax do
+    inc(i);
+  end;
+  WriteMenuItem(EditorMenuContent[MenuPos].Text,true);
+  inc(i);
+  While i<=EditorMenuMax do
+  begin
     WriteMenuItem(EditorMenuContent[i].Text,false);
+    inc(i);
+  end;
+  CursorOut;
 end;
 
 Function EditorMenu:MenuSelection;
@@ -86,27 +110,32 @@ var
   ch:Char;
 begin
   Position:=1;
+  WriteHintLine(MenuHintLine);
   WriteAllMenu(Position);
   repeat
     ch:=ReadKey;
     case ch of
-      kbdLeft:
-        if Position<MenuMax then
-          begin
-            inc(Position);
-            WriteAllMenu(Position);
-          end;
+
       kbdRight:
+        if Position<EditorMenuMax then
+          inc(Position)
+        else
+          Position:=1;
+
+      kbdLeft:
         if Position>1 then
-          begin
-            inc(Position);
-            WriteAllMenu(Position);
-          end;
+          dec(Position)
+        else
+          Position:=EditorMenuMax;
+
       kbdEsc:
         EditorMenu:=mnuResume;
+
       kbdEnter:
         EditorMenu:=EditorMenuContent[Position].Value;
-    end;
+
+    end; { case }
+    WriteAllMenu(Position);
   until (ch=kbdEnter) or (ch=kbdESC);
 end;
 

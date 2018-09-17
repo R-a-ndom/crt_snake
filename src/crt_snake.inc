@@ -23,7 +23,7 @@ CONST
   kbdRight=#77;
   kbdUp=#72;
   kbdDown=#80;
-  
+
   kbdESC=#27;
   kbdSpace=#32;
   kbdENTER=#13;

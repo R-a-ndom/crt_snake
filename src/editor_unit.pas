@@ -5,7 +5,7 @@
 console arcade game on Free Pascal
 using CRT unit
 
-Level editor uni }
+Level editor unit }
 
 UNIT Editor_Unit;
 
@@ -18,22 +18,55 @@ Uses
 
 const
 
-StatusString=
-  '  | ARROWS - move cursor | SPACE - draw/erase brick | ESC - editor menu |';
+{ editor colors }
+
+edcol_MainBG=Black;
+edcol_HintLineBG=LightGray;
+
+edcol_MainText=LightGray;
+
+edcol_MenuUnactive=LightGray;
+edcol_MenuUnSelItem=White;
+edcol_MenuSelItem=Yellow;
+
+edcol_HintLineText=Black;
+
+edcol_FieldBrick=Red;
+
+edcol_FieldCursor=LightBlue;
+
+edcol_StatusLineText=Magenta;
+
+
+{ hint lines }
+
+MainHintLine =
+  ' | ARROWS - move cursor | SPACE - draw/erase brick | ESC - editor menu |  ';
+MenuHintLine =
+  ' EDITOR MENU || LEFT/RIGHT - move cursor | ENTER - select | ESC - resume |';
+
+{ screen objects coordinates }
+
+StatusLinePos : ScrPos = (Col : 7 ; Row : 23);
 
 { procedures and functions }
 
 Procedure CreateEmptyLevel(var A:GameField);
 
-Procedure WriteStatusLine;
+Procedure WriteHintLine(HintString:String);
 
 Function Cell2String(s:CellValue):CellString;
 
 Procedure DrawLevel(var A:GameField);
 
+Procedure WriteStatusLine(CursorPos:ScrPos;Changed:Boolean);
+
 Procedure DrawOneCell(var A:GameField; CellPos:ScrPos ; Selected:Boolean);
 
-Procedure MoveCursor(var A:GameField; CursorPos:ScrPos; ColDir,RowDir:Integer);
+Procedure MoveCursor(var A:GameField;var CursorPos:ScrPos;
+                     ColDir,RowDir:Integer);
+
+Procedure ChangeCellUnderCursor(var A:GameField ; CursorPos:ScrPos);
 
 
 IMPLEMENTATION
@@ -48,11 +81,12 @@ begin
      A[i,j]:=clEmpty;
 end;
 
-Procedure WriteStatusLine;
+Procedure WriteHintLine(HintString:String);
 begin
-  TextColor(White);
-  GotoXY(1,1);
-  Write(StatusString);
+  TextBackground(edcol_HintLineBG);
+  TextColor(edcol_HintLineText);
+  GotoXY(1,ScreenHeight);
+  Write(HintString);
   CursorOut;
 end;
 
@@ -66,8 +100,8 @@ Procedure DrawLevel(var A:GameField);
 var
   i,j:Word;
 begin
-  TextBackground(Black);
-  TextColor(LightGray);
+  TextBackground(edcol_MainBG);
+  TextColor(edcol_MainText);
   for i:=0 to FieldHeight do 
   begin
     GotoXY(Field_LeftUp.Col,Field_LeftUp.Row+i);
@@ -76,22 +110,54 @@ begin
   end;
 end;
 
-Procedure DrawOneCell(var A:gameField; CellPos:ScrPos ; Selected:Boolean);
+Procedure WriteStatusLine(CursorPos:ScrPos;Changed:Boolean);
+begin
+  TextBackground(edcol_MainBG);
+  TextColor(edcol_StatusLineText);
+  GotoXY(StatusLinePos.Col,StatusLinePos.Row);
+  Write(CursorPos.Col:3,' : ',CursorPos.Row:3);
+  if Changed then
+    Write('   changed   ')
+  else
+  begin
+    TextColor(edcol_MainText);
+    Write(' not changed ');
+  end;
+
+end;
+
+Procedure DrawOneCell(var A:GameField; CellPos:ScrPos ; Selected:Boolean);
 begin
   if Selected then
-    TextBackground(LightGreen)
+    TextBackground(edcol_FieldCursor)
   else
-    TextBackground(Black);
+    TextBackground(edcol_MainBG);
+  if A[CellPos.Col,CellPos.Row]=clEmpty then
+    TextColor(edcol_MainText)
+  else
+    TextColor(edcol_FieldBrick);
   GotoXY(ScreenCol(CellPos.Col),ScreenRow(CellPos.Row));
   Write(Cell2String(A[CellPos.Col,CellPos.Row]));
 end;
 
-Procedure MoveCursor(var A:GameField; CursorPos:ScrPos; ColDir,RowDir:Integer);
+Procedure MoveCursor(var A:GameField; var CursorPos:ScrPos;
+                     ColDir,RowDir:Integer);
 begin
   DrawOneCell(A,CursorPos,false);
   CursorPos.Col:=CursorPos.Col+ColDir;
   CursorPos.Row:=CursorPos.Row+RowDir;
   DrawOneCell(A,CursorPos,true);
 end;
+
+Procedure ChangeCellUnderCursor(var A:GameField;CursorPos:ScrPos);
+begin
+  if A[CursorPos.Col,CursorPos.Row]=clBrick then
+    A[CursorPos.Col,CursorPos.Row]:=clEmpty
+  else
+    A[CursorPos.Col,CursorPos.Row]:=clBrick;
+  DrawOneCell(A,CursorPos,true);
+end;
+
+{ --- *** --- }
 
 END.

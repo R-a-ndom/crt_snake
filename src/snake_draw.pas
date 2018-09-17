@@ -69,11 +69,13 @@ Function ScreenCol(HPos:Word):Word;
 
 Function ScreenRow(VPos:Word):Word;
 
+
 IMPLEMENTATION
+
 
 Procedure CursorOut;
 begin
-  GotoXY(1,ScreenHeight);
+  GotoXY(ScreenWidth-1,1);
 end;
 
 Procedure DrawFieldBorder;
