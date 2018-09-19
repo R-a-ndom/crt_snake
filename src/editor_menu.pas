@@ -83,6 +83,8 @@ begin
   GotoXY(MenuStart.Col,MenuStart.Row);
   For i:=1 to EditorMenuMax do
     Write(MenuUnselMark,EditorMenuContent[i].Text,MenuUnselMark);
+  for i:=WhereX to ScreenWidth-1 do
+    Write(#32);
 end;
 
 { --- }
@@ -138,7 +140,7 @@ var
   ch:Char;
 begin
   Position:=1;
-  WriteHintLine(MenuHintLine);
+  WriteHintLine(hint_MenuHintLine);
   WriteAllMenu(Position);
   repeat
     ch:=ReadKey;
@@ -245,7 +247,7 @@ var
 begin
   YesSelected:=false;
   WriteYesNoMessage(Message,YesSelected);
-  WriteHintLine(YesNoHintLine);
+  WriteHintLine(hint_YesNoHintLine);
   repeat
     ch:=ReadKey;
     case ch of

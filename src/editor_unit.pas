@@ -48,17 +48,27 @@ edcol_YesNoSel=Yellow;
 
 { hint lines }
 
-MainHintLine  =
+hint_MainHintLine  =
   ' | ARROWS - move cursor | SPACE - draw/erase brick | ESC - editor menu |  ';
-MenuHintLine  =
+hint_MenuHintLine  =
   ' EDITOR MENU || LEFT/RIGHT - move cursor | ENTER - select | ESC - resume |';
-YesNoHintLine =
+hint_YesNoHintLine =
   ' UP / DOWN - change || ENTER - select ';
+hint_Warning =
+  'LEVEL has been CHANGED ! SAVE ?';
+hint_SuccessAdd =
+  'Successfully ADDED !';
+hint_SuccessSave =
+  'Successfully SAVED !';
+hint_SuccessDel =
+  'Successfully DELETED !';
 
 { screen objects coordinates }
 
 StatusLinePos : ScrPos = (Col : 7 ; Row : 23);
-DrawingDelay=50;
+FileInfoPos   : ScrPos = (Col : 39; Row : 23);
+
+DrawingDelay=20;
 
 
 { procedures and functions }
@@ -67,11 +77,13 @@ Procedure CreateEmptyLevel(var A:GameField);
 
 Procedure WriteHintLine(HintString:String);
 
+Procedure WriteStatusLine(CursorPos:ScrPos;Changed:Boolean);
+
+Procedure WriteFileInfo(var lf:LevelFile);
+
 Function Cell2String(s:CellValue):CellString;
 
 Procedure DrawLevel(var A:GameField);
-
-Procedure WriteStatusLine(CursorPos:ScrPos;Changed:Boolean);
 
 Procedure DrawOneCell(var A:GameField; CellPos:ScrPos ; Selected:Boolean);
 
@@ -106,6 +118,35 @@ begin
   CursorOut;
 end;
 
+Procedure WriteStatusLine(CursorPos:ScrPos;Changed:Boolean);
+begin
+  TextBackground(edcol_MainBG);
+  TextColor(edcol_StLineActive);
+  GotoXY(StatusLinePos.Col,StatusLinePos.Row);
+  Write(CursorPos.Col:3,' : ',CursorPos.Row:3);
+  if Changed then
+    Write('   changed   ')
+  else
+  begin
+    TextColor(edcol_StLineUnactive);
+    Write(' not changed ');
+  end;
+end;
+
+Procedure WriteFileInfo(var lf:LevelFile);
+begin
+  TextBackground(edcol_MainBG);
+  GotoXY(FileInfoPos.Col,FileInfoPos.Row);
+  TextColor(edcol_StLineUnactive);
+  Write(' Current : ');
+  TextColor(edcol_StLineActive);
+  Write(FilePos(lf):2);
+  TextColor(edcol_StLineUnactive);
+  Write(' | All : ');
+  TextColor(edcol_StLineActive);
+  Write(FileSize(lf):2,#32);
+end;
+
 Function Cell2String(s:CellValue):CellString;
 begin
   if s=clEmpty then Cell2String:=imgEmpty;
@@ -133,21 +174,6 @@ begin
   end;
 end;
 
-Procedure WriteStatusLine(CursorPos:ScrPos;Changed:Boolean);
-begin
-  TextBackground(edcol_MainBG);
-  TextColor(edcol_StLineActive);
-  GotoXY(StatusLinePos.Col,StatusLinePos.Row);
-  Write(CursorPos.Col:3,' : ',CursorPos.Row:3);
-  if Changed then
-    Write('   changed   ')
-  else
-  begin
-    TextColor(edcol_StLineUnactive);
-    Write(' not changed ');
-  end;
-
-end;
 
 Procedure DrawOneCell(var A:GameField; CellPos:ScrPos ; Selected:Boolean);
 var

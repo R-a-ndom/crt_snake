@@ -1,4 +1,4 @@
-# CRT_SNAKE 
+# CRT_SNAKE
 # GIT ignoring file
 
 # all info files
@@ -10,5 +10,5 @@
 /src/level_editor
 /src/*.o
 /src/*.ppu
-
+/src/crt_snake.lvl
 

@@ -33,16 +33,18 @@ TYPE
 
 { field cell values }
 
-  CellValue=( clEmpty,  {empty cell}
-              clBrick,  {brick cell}
-              clFriut,  {friut - for growing}
-              clCoin,   {coin - for score}
-              clBody,   {snake's body}
-              clHead ); {snake's head}
+  CellValue = ( clEmpty,  {empty cell}
+                clBrick,  {brick cell}
+                clFriut,  {friut - for growing}
+                clCoin,   {coin - for score}
+                clBody,   {snake's body}
+                clHead ); {snake's head}
 
 { game field array }
 
-  GameField=array[0..FieldWidth,0..FieldHeight] of CellValue;
+  GameField = array[0..FieldWidth,0..FieldHeight] of CellValue;
+
+  LevelFile = file of GameField;
 
 { menu selection items }
 

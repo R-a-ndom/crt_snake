@@ -14,39 +14,72 @@ Program LevelEditor;
 USES
   CRT,Snake_Draw,Editor_Unit,Editor_Menu;
 
-Procedure RefreshScreen(var A:GameField;CurrentCursorPos:ScrPos);
+CONST
+  LevelFileName='crt_snake.lvl';
+
+{ main file procedures and functions }
+
+Procedure RefreshScreen(var f:LevelFile;var A:GameField;
+                                                CurrentCursorPos:ScrPos);
 begin
   ClearYesNoArea;
   WriteUnactiveMenu;
-  WriteHintLine(MainHintLine);
+  WriteHintLine(hint_MainHintLine);
   DrawOneCell(A,CurrentCursorPos,true);
+  WriteFileInfo(f);
 end;
 
+{ --- --- --- }
 
 VAR
-  EditedLevel:GameField;
+  NewLevel,EditedLevel : GameField;
+  lvlf:File of GameField;
+  tmp_num:Word;
   CursorPos:ScrPos;
   sym:Char;
   ProgramState:MenuSelection;
   Changed:Boolean;
 
+{
+  --- MAIN PROGRAM ---
+}
+
 BEGIN
 
 { editor initialisation }
 
+  WriteLn('Running CRT_SNAKE LEVEL EDITOR...');
+  Assign(lvlf,LevelFileName);
+{$I-}
+  Write('Opening CRT_SNAKE.LVL flie...');
+  Reset(lvlf);
+  if IOResult = 0 then
+  begin
+    WriteLn('  Successfully open.');
+    Seek(lvlf,FileSize(lvlf)-1);
+    Read(lvlf,EditedLevel);
+  end
+  else
+  begin
+    Rewrite(lvlf);
+    Write('  Successfully created !');
+    CreateEmptyLevel(EditedLevel);
+    Seek(lvlf,0);
+    Write(lvlf,Editedlevel);
+  end;
+{$I+}
   ClrScr;
   TextColor(edcol_FieldBrick);
   DrawFieldBorder;
-  CreateEmptyLevel(EditedLevel);
   DrawLevel(EditedLevel);
 
   CursorPos.Row:=0;
   CursorPos.Col:=0;
+  ProgramState:=mnuResume;
 
-  RefreshScreen(EditedLevel,CursorPos);
   Changed:=false;
 
-  WriteStatusLine(CursorPos,Changed);
+  RefreshScreen(lvlf,EditedLevel,CursorPos);
   CursorOut;
 
 { main loop }
@@ -72,7 +105,7 @@ BEGIN
         if CursorPos.Col>0 then
             MoveCursor(EditedLevel,CursorPos,-1,0);
 
-      kbdSpace: { drawing / erasing bricks }
+      kbdSpace: { SPACE BAR - drawing / erasing bricks }
         begin
           ChangeCellUnderCursor(EditedLevel,CursorPos);
           if not Changed then
@@ -90,14 +123,42 @@ BEGIN
         end;
       mnuEdNavForward:
         begin
-        end;
-      mnuEdAddToEnd:
+        end;}
+
+       mnuEdAddToEnd:  { ADDING a new level }
         begin
+          if (YesNoSelect('ADD NEW ?')=mnuConfirm) then
+          begin
+            tmp_num:=FilePos(lvlf);
+            Seek(lvlf,FileSize(lvlf));
+            CreateEmptyLevel(NewLevel);
+            Write(lvlf,NewLevel);
+            Seek(lvlf,tmp_num);
+            WriteHintLine(hint_SuccessAdd);
+          end
+          else
+          begin
+            RefreshScreen(lvlf,EditedLevel,CursorPos);
+          end;
+            ProgramState:=mnuResume;
         end;
-      mnuEdSave:
-        begin
-        end;
-      mnuEdDelete:
+
+       mnuEdSave: { SAVING edited level }
+         begin
+           if (YesNoSelect('SAVE LEVEL ?')=mnuConfirm) then
+           begin
+             Seek(lvlf,FilePos(lvlf)-1);
+             Write(lvlf,EditedLevel);
+             WriteHintLine(hint_SuccessSave);
+             Changed:=false;
+           end
+           else
+           begin
+             RefreshScreen(lvlf,EditedLevel,CursorPos);
+           end;
+             ProgramState:=mnuResume;
+         end;
+{      mnuEdDelete:
         begin
         end;
       mnuEdMovBackward:
@@ -108,19 +169,24 @@ BEGIN
         end;  }
       mnuExitRequest:
         begin
-          if (YesNoSelect('Exit:')<>mnuConfirm) then
+          if (YesNoSelect('EXIT ?:')<>mnuConfirm) then
           begin
             ProgramState:=mnuResume;
-            ClearYesNoArea;
-            RefreshScreen(EditedLevel,CursorPos);
+            RefreshScreen(lvlf,EditedLevel,CursorPos);
           end;
         end;
-      else
-        RefreshScreen(EditedLevel,CursorPos);
+
+      else {another STATE}
+        begin
+          RefreshScreen(lvlf,EditedLevel,CursorPos);
+          CursorOut;
+        end;
     end; { case }
 
-    WriteStatusLine(CursorPos,Changed);
-    CursorOut;
   until ProgramState=mnuExitRequest;
+
+{ program done }
+
+  Close(lvlf);
   ClrScr;
 END.
