@@ -14,6 +14,15 @@ Program LevelEditor;
 USES
   CRT,Snake_Draw,Editor_Unit,Editor_Menu;
 
+Procedure RefreshScreen(var A:GameField;CurrentCursorPos:ScrPos);
+begin
+  ClearYesNoArea;
+  WriteUnactiveMenu;
+  WriteHintLine(MainHintLine);
+  DrawOneCell(A,CurrentCursorPos,true);
+end;
+
+
 VAR
   EditedLevel:GameField;
   CursorPos:ScrPos;
@@ -28,14 +37,15 @@ BEGIN
   ClrScr;
   TextColor(edcol_FieldBrick);
   DrawFieldBorder;
-  WriteUnactiveMenu;
-  WriteHintLine(MainHintLine);
   CreateEmptyLevel(EditedLevel);
   DrawLevel(EditedLevel);
+
   CursorPos.Row:=0;
   CursorPos.Col:=0;
+
+  RefreshScreen(EditedLevel,CursorPos);
   Changed:=false;
-  DrawOneCell(EditedLevel,CursorPos,true);
+
   WriteStatusLine(CursorPos,Changed);
   CursorOut;
 
@@ -70,17 +80,47 @@ BEGIN
         end;
       kbdESC: { enter to EDITOR MENU }
         begin
-{$ifdef DEBUG}
-          DrawLevel(EditedLevel);
-{$endif}
           ProgramState:=EditorMenu;
-          WriteUnactiveMenu;
-          WriteHintLine(MainHintLine);
-          DrawOneCell(EditedLevel,CursorPos,true);
         end;
     end; { case }
+
+    case ProgramState of { editor menu values }
+{      mnuEdNavBackward:
+        begin
+        end;
+      mnuEdNavForward:
+        begin
+        end;
+      mnuEdAddToEnd:
+        begin
+        end;
+      mnuEdSave:
+        begin
+        end;
+      mnuEdDelete:
+        begin
+        end;
+      mnuEdMovBackward:
+        begin
+        end;
+      mnuEdMovForward:
+        begin
+        end;  }
+      mnuExitRequest:
+        begin
+          if (YesNoSelect('Exit:')<>mnuConfirm) then
+          begin
+            ProgramState:=mnuResume;
+            ClearYesNoArea;
+            RefreshScreen(EditedLevel,CursorPos);
+          end;
+        end;
+      else
+        RefreshScreen(EditedLevel,CursorPos);
+    end; { case }
+
     WriteStatusLine(CursorPos,Changed);
     CursorOut;
-  until ProgramState=mnuExit;
+  until ProgramState=mnuExitRequest;
   ClrScr;
 END.

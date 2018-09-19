@@ -25,19 +25,25 @@ case $confirm in
 
 # DEBUG - building a game
 
-  1) fpc $debug_key crt_snake.pas ;;
+  1) fpc $debug_key crt_snake.pas 
+     ;;
 
 # DEBUG - building a level editor
 
-  2) fpc $debug_key -olevel_editor editor_main.pas ;;
+  2) fpc $debug_key -olevel_editor editor_main.pas 
+     ;;
 
 # RELEASE - building a game
 
-  3) fpc crt_snake.pas ;;
+  3) fpc crt_snake.pas
+     rm *.o *.ppu
+     ;;
 
 # RELEASE - building a level editor
 
-  4) fpc -olevel_editor editor_main.pas ;;
+  4) fpc -olevel_editor editor_main.pas
+     rm *.o *.ppu
+     ;;
 
 # deleting compilation results
 

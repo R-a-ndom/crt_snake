@@ -16,38 +16,50 @@ INTERFACE
 Uses
   CRT,Snake_draw;
 
+{ $I crt_snake.inc}
+
 const
+
 
 { editor colors }
 
 edcol_MainBG=Black;
-edcol_HintLineBG=LightGray;
-
 edcol_MainText=LightGray;
 
-edcol_MenuUnactive=LightGray;
+edcol_MenuBG=LightCyan;
+edcol_MenuUnactive=DarkGray;
 edcol_MenuUnSelItem=White;
 edcol_MenuSelItem=Yellow;
 
-edcol_HintLineText=Black;
+edcol_HintLineBG=Black;
+edcol_HintLineText=Yellow;
 
 edcol_FieldBrick=Red;
 
 edcol_FieldCursor=LightBlue;
 
-edcol_StatusLineText=Magenta;
+edcol_StLineActive=Magenta;
+edcol_StLineUnactive=LightGray;
 
+edcol_YesNoBG=LightRed;
+edcol_YesNoMsgText=LightCyan;
+edcol_YesNoUnsel=Brown;
+edcol_YesNoSel=Yellow;
 
 { hint lines }
 
-MainHintLine =
+MainHintLine  =
   ' | ARROWS - move cursor | SPACE - draw/erase brick | ESC - editor menu |  ';
-MenuHintLine =
+MenuHintLine  =
   ' EDITOR MENU || LEFT/RIGHT - move cursor | ENTER - select | ESC - resume |';
+YesNoHintLine =
+  ' UP / DOWN - change || ENTER - select ';
 
 { screen objects coordinates }
 
 StatusLinePos : ScrPos = (Col : 7 ; Row : 23);
+DrawingDelay=50;
+
 
 { procedures and functions }
 
@@ -82,11 +94,15 @@ begin
 end;
 
 Procedure WriteHintLine(HintString:String);
+var
+  i:Word;
 begin
   TextBackground(edcol_HintLineBG);
   TextColor(edcol_HintLineText);
   GotoXY(1,ScreenHeight);
   Write(HintString);
+  for i:=WhereX to ScreenWidth-1 do
+    Write(#32);
   CursorOut;
 end;
 
@@ -113,20 +129,21 @@ begin
         TextColor(edcol_MainText);
       Write(Cell2String(A[j,i]));
     end;
+    Delay(DrawingDelay);
   end;
 end;
 
 Procedure WriteStatusLine(CursorPos:ScrPos;Changed:Boolean);
 begin
   TextBackground(edcol_MainBG);
-  TextColor(edcol_StatusLineText);
+  TextColor(edcol_StLineActive);
   GotoXY(StatusLinePos.Col,StatusLinePos.Row);
   Write(CursorPos.Col:3,' : ',CursorPos.Row:3);
   if Changed then
     Write('   changed   ')
   else
   begin
-    TextColor(edcol_MainText);
+    TextColor(edcol_StLineUnactive);
     Write(' not changed ');
   end;
 
@@ -167,6 +184,7 @@ begin
     A[CursorPos.Col,CursorPos.Row]:=clBrick;
   DrawOneCell(A,CursorPos,true);
 end;
+
 
 { --- *** --- }
 

@@ -49,15 +49,16 @@ TYPE
   MenuSelection = ( mnuBeginGame,     { MAIN - begin game }
                     mnuShowHighScore, { MAIN - show high score screen }
                     mnuResume,        { PAUSE,EDITOR - resume game/editing }
+                    mnuConfirm,       { ALL - confirm }
+                    mnuCancel,        { ALL - cancel }
                     mnuExitToMainMenu,{ PAUSE - exit to main menu}
-                    mnuExit,          { ALL - exit}
+                    mnuExitRequest,   { ALL - exit}
                     mnuEdNavForward,  { EDITOR - navigation : forward }
                     mnuEdNavBackward, { EDITOR - navigation : backward }
-                    mnuEdNew,         { EDITOR - new level }
-                    mnuEdReplace,     { EDITOR - save level : replace }
-                    mnuEdInsert,      { EDITOR - save level : insert }
+                    mnuEdAddToEnd,    { EDITOR - add an empty level to the end }
+                    mnuEdSave,        { EDITOR - save level : replace }
                     mnuEdDelete,      { EDITOR - delete level }
-                    mnuEdMvForward,   { EDITOR - move level : forward }
-                    mnuEdMvBackward); { EDITOR - move level : backward }
+                    mnuEdMovForward,   { EDITOR - move level : forward }
+                    mnuEdMovBackward); { EDITOR - move level : backward }
 
 {$endif}

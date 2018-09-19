@@ -44,10 +44,8 @@ CONST
 { MS_DOS and Windows CMD screen size }
 
 {$ifdef WIN_DOS}
-
   ScreenWidth=80;
   ScreenHeight=25;
-
 {$endif}
 
   imgEmpty = '::';
@@ -64,11 +62,9 @@ CONST
   pattBody  : CellPAttern = (SymColor : Magenta;  Image : imgBody);
   pattHead  : CellPAttern = (SymColor : Magenta;  Image : imgHead);
 
-  Field_LeftUp:ScrPos=( Col : 6 ; Row : 3 );
+  Field_LeftUp:ScrPos=( Col : 4 ; Row : 3 );
 
-{
-  procedures and functions
-}
+{ procedures and functions }
 
 Procedure CursorOut;
 
