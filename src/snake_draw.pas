@@ -32,6 +32,14 @@ TYPE
     Col,Row:Word
   end;
 
+  ScreenParams=record
+{$ifdef EDITOR}
+    FieldLeftTop,StLineStart,YesNoMsgLeftTop:ScrPos
+{$else}
+    FieldLeftTop,YesNoMsgLeftTop:ScrPos
+{$endif}
+  end;
+
   CellString=string[CellWidth];
 
   CellPattern=record
@@ -64,6 +72,10 @@ CONST
 
 { PROCEDURES AND FUNCTIONS }
 
+{ filling string with SPACE BAR symbols }
+
+Procedure FillString(EndPoint:Word);
+
 { clearing rectangle screen area }
 
 Procedure ClearRect(LeftTop:ScrPos;DCol,DRow:Word);
@@ -74,7 +86,7 @@ Procedure CursorOut;
 
 { evaluating point of object drawing - middle of screen }
 
-Function EvalMiddleLeftTop(ObjWidth,ObjHeight:Word):ScrPos;
+Function EvalMiddlePosLeftTop(ObjWidth,ObjHeight:Word):ScrPos;
 
 { drawing game field border  }
 
@@ -88,32 +100,52 @@ Function AbsRow(LeftTop:ScrPos; VPos:Word):Word;
 
 IMPLEMENTATION
 
+
+Procedure FillString(EndPoint:Word);
+var
+  i:Word;
+begin
+  i:=WhereX;
+  While i<=EndPoint do
+  begin
+    Write(#32);
+    inc(i);
+  end;
+end;
+
+{ --- }
+
 Procedure ClearRect(LeftTop:ScrPos;DCol,DRow:Word);
 var
-  i,j:Integer;
+  i:Integer;
 begin
   GotoXY(LeftTop.Col,LeftTop.Row);
   for i:=LeftTop.Row to LeftTop.Row+DRow do
   begin
     GotoXY(LeftTop.Col,i);
-    For j:=LeftTop.Col to LeftTop.Col+DCol do
-      Write(#32);
+    FillString(LeftTop.Col+DCol);
   end;
 end;
+
+{ --- }
 
 Procedure CursorOut;
 begin
   GotoXY(ScreenWidth,1);
 end;
 
-Function EvalMiddleLeftTop(ObjWidth,ObjHeight:Word):ScrPos;
+{ --- }
+
+Function EvalMiddlePosLeftTop(ObjWidth,ObjHeight:Word):ScrPos;
 var
   tmp:ScrPos;
 begin
   tmp.Col:=( ScreenWidth - ObjWidth ) div 2;
   tmp.Row:=( ScreenHeight - ObjHeight) div 2;
-  EvalMiddleLeftTop:=tmp;
+  EvalMiddlePosLeftTop:=tmp;
 end;
+
+{ --- }
 
 Procedure DrawFieldBorder(LeftTop:ScrPos);
 var
@@ -136,14 +168,20 @@ begin
     Write(imgBrick);
 end;
 
+{ --- }
+
 Function AbsCol(LeftTop:ScrPos; HPos:Word):Word;
 begin
   AbsCol:=LeftTop.Col + HPos*CellWidth;
 end;
 
+{ --- }
+
 Function AbsRow(LeftTop:ScrPos; VPos:Word):Word;
 begin
   AbsRow:=LeftTop.Row + VPos;
 end;
+
+{ --- --- --- --- --- }
 
 END.

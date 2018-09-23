@@ -26,6 +26,7 @@ TYPE
   all modes off: pressing Space bar changed cell under cursor
 }
 
+
 EditorMode=record
   Modified,Wall,Erase : boolean
 end;
@@ -64,23 +65,27 @@ DrawingDelay=20;
 
 { procedures and functions }
 
-Procedure CreateEmptyLevel(var A:GameField);
-
 Function EvalStatusLinePoint(FieldLeftTop:ScrPos):ScrPos;
 
-Procedure WriteFullStatusLine
-                (var lf:LevelFile;Mode:EditorMode;CursorPos,StartPos:ScrPos);
+Procedure CreateEmptyLevel(var A:GameField);
 
 Function Cell2String(s:CellValue):CellString;
 
+Procedure WriteFullStatusLine
+    (var lf:LevelFile; StLineStart,CursorPos:ScrPos; Mode:EditorMode);
+
+Procedure SwitchModes(var Mode:EditorMode);
+
 Procedure DrawLevel(var A:GameField; LeftTop:ScrPos);
 
-Procedure DrawOneCell(var A:GameField; LeftTop,CellPos:ScrPos; Selected:Boolean);
+Procedure DrawOneCell
+    (var A:GameField; LeftTop,CellPos:ScrPos; Selected:Boolean);
 
-Procedure MoveCursor(var A:GameField;LeftTop:ScrPos;var CursorPos:ScrPos;
-                     ColDir,RowDir:Integer);
+Procedure MoveCursor
+         (var A:GameField; var CursorPos:ScrPos;
+          LeftTop:ScrPos; ColDir,RowDir:Integer);
 
-Procedure ChangeCellUnderCursor(var A:GameField ; LeftTop,CursorPos:ScrPos);
+Procedure ChangeCellUnderCursor(var A:GameField; LeftTop,CursorPos:ScrPos);
 
 
 IMPLEMENTATION
@@ -96,6 +101,8 @@ begin
   tmp.Row:=FieldLeftTop.Row+FieldHeight+1;
   EvalStatusLinePoint:=tmp;
 end;
+
+{ --- }
 
 Procedure CreateEmptyLevel(var A:GameField);
 var
@@ -114,6 +121,8 @@ begin
   TextColor(edcol_StLineActive);
   Write(CursorPos.Col:3,' : ',CursorPos.Row:3);
 end;
+
+{ --- }
 
 Procedure WriteEditorMode(Mode:EditorMode);
 const
@@ -146,6 +155,8 @@ begin
   Write(sign_Erase);
 end;
 
+{ --- }
+
 Procedure WriteFileInfo(var lf:LevelFile);
 begin
   TextBackground(edcol_MainBG);
@@ -159,10 +170,12 @@ begin
   Write(FileSize(lf):2,#32);
 end;
 
+{ --- }
+
 Procedure WriteFullStatusLine
-                (var lf:LevelFile;Mode:EditorMode;CursorPos,StartPos:ScrPos);
+        (var lf:LevelFile; StLineStart,CursorPos:ScrPos; Mode:EditorMode);
 begin
-  GotoXY(StartPos.Col,StartPos.Row);
+  GotoXY(StLineStart.Col,StLineStart.Row);
   WriteCursorCoords(CursorPos);
   WriteEditorMode(Mode);
   WriteFileInfo(lf);
@@ -184,6 +197,8 @@ begin
       Wall := true;
   end;
 end;
+
+{ --- }
 
 Function Cell2String(s:CellValue):CellString;
 begin
@@ -239,8 +254,9 @@ end;
 
 { moving cursor during level editing }
 
-Procedure MoveCursor(var A:GameField; LeftTop:ScrPos; var CursorPos:ScrPos;
-                     ColDir,RowDir:Integer);
+Procedure MoveCursor
+         (var A:GameField; var CursorPos:ScrPos;
+          LeftTop:ScrPos; ColDir,RowDir:Integer);
 begin
   DrawOneCell(A,LeftTop,CursorPos,false);
   CursorPos.Col:=CursorPos.Col+ColDir;

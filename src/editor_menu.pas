@@ -18,9 +18,11 @@ USES
 
 CONST
 
-YesNoMsgWidth=32;
+  YesNoMsgWidth=32;
+  YesNoMsgHeight=6;
 
 TYPE
+
   YesNoMsgString=String[YesNoMsgWidth];
 
 CONST
@@ -95,7 +97,6 @@ CONST
 
 { yes-no function constants  }
 
-  YesNoMsgHeight=6;
   YesNoSureMsgRel:ScrPos=(Col:3;Row:8);
   YesNoButtonsRel:ScrPos=(Col:4;Row:5);
 

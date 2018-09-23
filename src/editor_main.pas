@@ -22,15 +22,22 @@ CONST
 
 Procedure ErrorExit;
 begin
-  Write(stderr,'Unable to open or create SNAKE_CRT.LVL!');
-  Write(stderr,'Progrm will be closed...');
+  Write(stderr,'Unable to open or create SNAKE_CRT.LVL !');
+  Write(stderr,'Program will be closed...');
   Halt(1);
+end;
+
+Procedure GetScreenParams(var A:ScreenParams);
+begin
+  A.FieldLeftTop := EvalLeftTopPoint(FieldWidth+1,FieldHeight+1);
+  A.StLinePos    := EvalStLineStasrt(FieldLeftTop);
+  A.YesNoLeftTop := EvalLeftTopPoint(YesNoMsgWidth,YesNoMsgHeight);
 end;
 
 { editor initialisation }
 
 Procedure EditorInit(var lf:LevelFile;
-                     var FieldStartPos,StLinePos:ScrPos);
+                     var A:ScreenParams);
 begin
   WriteLn('Running CRT_SNAKE LEVEL EDITOR...');
   Assign(lf,LevelFileName);
@@ -47,18 +54,17 @@ begin
   end;
   WriteLn(' Successfully. Levels in file:',FileSize(lf));
 {$I+}
-  FieldStartPos:=EvalLeftTopPoint(FieldWidth+1,FieldHeight+1);
-  StLinePos:=EvalStLineStasrt(FieldStartPos);
-  YesNoLeftTop:=EvalLeftTopPoint()
+  GetScreenParams(A);
 end;
 
-{ refresh editor screen }
+{ reset editor screen }
 
-Procedure ResetScreen(var f:LevelFile;var A:GameField;Mode:EditorMode;
-                                      LeftTopPos,CursorPos,StLinePos:ScrPos);
+Procedure ResetEditorScreen
+        (var f:LevelFile; var A:GameField;
+         Mode:EditorMode;CursorPos:ScrPos;Param:ScreenParams);
 begin
   WriteUnactiveMenu;
-  DrawLevel(A);
+  DrawLevel(Param.LeftTop,A);
   WriteHintLine(hint_MainHintLine);
   DrawOneCell(A,CursorPos,true);
   WriteFullStatusLine(f,Mode,CursorPos,LeftTopPos);
@@ -69,19 +75,20 @@ end;
 VAR
   NewLevel,EditedLevel : GameField;
   lvlf:File of GameField;
-  Mode:EditorMode;
+  Mode:EditorMode=(Modified:False;Wall:False;Erase:False);
   tmp_num:Word;
+  ScrParam:ScreenParams;
   CursorPos:ScrPos;
   sym:Char;
   ProgramState:MenuSelection;
-  Changed:Boolean;
 
-{
+{ --------------------
   --- MAIN PROGRAM ---
-}
+  -------------------- }
 
 BEGIN
 
+  ProgramInit(lvlf,FieldLeftTop,YesNoMsgLeftTop);
   ClrScr;
   TextColor(edcol_FieldBrick);
   DrawFieldBorder;
@@ -93,7 +100,7 @@ BEGIN
 
   Changed:=false;
 
-  RefreshScreen(lvlf,EditedLevel,CursorPos);
+  ResetScreen(lvlf,EditedLevel,CursorPos,);
   CursorOut;
 
 { main loop }
