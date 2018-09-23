@@ -6,27 +6,62 @@ console arcade game on Free pascal using CRT unit
 level editor main file
 
 (c) Alexey Sorokin, 2018
-
 }
 
 Program LevelEditor;
 
 USES
-  CRT,Snake_Draw,Editor_Unit,Editor_Menu;
+  CRT,Snake_Draw,Editor_Unit,Editor_File,Editor_Menu;
 
 CONST
   LevelFileName='crt_snake.lvl';
 
-{ main file procedures and functions }
+{ main file PROCEDURES AND FUNCTIONS }
 
-Procedure RefreshScreen(var f:LevelFile;var A:GameField;
-                                                CurrentCursorPos:ScrPos);
+{ exit with error }
+
+Procedure ErrorExit;
 begin
-  ClearYesNoArea;
+  Write(stderr,'Unable to open or create SNAKE_CRT.LVL!');
+  Write(stderr,'Progrm will be closed...');
+  Halt(1);
+end;
+
+{ editor initialisation }
+
+Procedure EditorInit(var lf:LevelFile;
+                     var FieldStartPos,StLinePos:ScrPos);
+begin
+  WriteLn('Running CRT_SNAKE LEVEL EDITOR...');
+  Assign(lf,LevelFileName);
+{$I-}
+  Write('Opening or creating CRT_SNAKE.LVL flie...');
+  Reset(lf);
+  if IOResult <> 0 then
+    ErrorExit
+  else
+  begin
+    CreateNewFile(lf);
+    if IOResult <> 0 then
+      ErrorExit;
+  end;
+  WriteLn(' Successfully. Levels in file:',FileSize(lf));
+{$I+}
+  FieldStartPos:=EvalLeftTopPoint(FieldWidth+1,FieldHeight+1);
+  StLinePos:=EvalStLineStasrt(FieldStartPos);
+  YesNoLeftTop:=EvalLeftTopPoint()
+end;
+
+{ refresh editor screen }
+
+Procedure ResetScreen(var f:LevelFile;var A:GameField;Mode:EditorMode;
+                                      LeftTopPos,CursorPos,StLinePos:ScrPos);
+begin
   WriteUnactiveMenu;
+  DrawLevel(A);
   WriteHintLine(hint_MainHintLine);
-  DrawOneCell(A,CurrentCursorPos,true);
-  WriteFileInfo(f);
+  DrawOneCell(A,CursorPos,true);
+  WriteFullStatusLine(f,Mode,CursorPos,LeftTopPos);
 end;
 
 { --- --- --- }
@@ -34,6 +69,7 @@ end;
 VAR
   NewLevel,EditedLevel : GameField;
   lvlf:File of GameField;
+  Mode:EditorMode;
   tmp_num:Word;
   CursorPos:ScrPos;
   sym:Char;
@@ -46,28 +82,6 @@ VAR
 
 BEGIN
 
-{ editor initialisation }
-
-  WriteLn('Running CRT_SNAKE LEVEL EDITOR...');
-  Assign(lvlf,LevelFileName);
-{$I-}
-  Write('Opening CRT_SNAKE.LVL flie...');
-  Reset(lvlf);
-  if IOResult = 0 then
-  begin
-    WriteLn('  Successfully open.');
-    Seek(lvlf,FileSize(lvlf)-1);
-    Read(lvlf,EditedLevel);
-  end
-  else
-  begin
-    Rewrite(lvlf);
-    Write('  Successfully created !');
-    CreateEmptyLevel(EditedLevel);
-    Seek(lvlf,0);
-    Write(lvlf,Editedlevel);
-  end;
-{$I+}
   ClrScr;
   TextColor(edcol_FieldBrick);
   DrawFieldBorder;
@@ -104,6 +118,9 @@ BEGIN
       kbdLeft: { LEFT key }
         if CursorPos.Col>0 then
             MoveCursor(EditedLevel,CursorPos,-1,0);
+
+      kbdTab:  { TAB key }
+        SwitchEditorMode(Mode);
 
       kbdSpace: { SPACE BAR - drawing / erasing bricks }
         begin

@@ -16,10 +16,22 @@ INTERFACE
 Uses
   CRT,Snake_draw;
 
-{ $I crt_snake.inc}
+TYPE
 
-const
+{
+  editor drawing/erasing mode
+  modeWall  : drawing bricks during cursor moving;
+  modeErase : drawing empty space during cursor moving
+  
+  all modes off: pressing Space bar changed cell under cursor
+}
 
+EditorMode=record
+  Modified,Wall,Erase : boolean
+end;
+
+
+CONST
 
 { editor colors }
 
@@ -28,8 +40,8 @@ edcol_MainText=LightGray;
 
 edcol_MenuBG=LightCyan;
 edcol_MenuUnactive=DarkGray;
-edcol_MenuUnSelItem=White;
-edcol_MenuSelItem=Yellow;
+edcol_MenuUnsel=White;
+edcol_MenuSel=Yellow;
 
 edcol_HintLineBG=Black;
 edcol_HintLineText=Yellow;
@@ -46,55 +58,44 @@ edcol_YesNoMsgText=LightCyan;
 edcol_YesNoUnsel=Brown;
 edcol_YesNoSel=Yellow;
 
-{ hint lines }
-
-hint_MainHintLine  =
-  ' | ARROWS - move cursor | SPACE - draw/erase brick | ESC - editor menu |  ';
-hint_MenuHintLine  =
-  ' EDITOR MENU || LEFT/RIGHT - move cursor | ENTER - select | ESC - resume |';
-hint_YesNoHintLine =
-  ' UP / DOWN - change || ENTER - select ';
-hint_Warning =
-  'LEVEL has been CHANGED ! SAVE ?';
-hint_SuccessAdd =
-  'Successfully ADDED !';
-hint_SuccessSave =
-  'Successfully SAVED !';
-hint_SuccessDel =
-  'Successfully DELETED !';
-
 { screen objects coordinates }
 
-StatusLinePos : ScrPos = (Col : 7 ; Row : 23);
-FileInfoPos   : ScrPos = (Col : 39; Row : 23);
-
 DrawingDelay=20;
-
 
 { procedures and functions }
 
 Procedure CreateEmptyLevel(var A:GameField);
 
-Procedure WriteHintLine(HintString:String);
+Function EvalStatusLinePoint(FieldLeftTop:ScrPos):ScrPos;
 
-Procedure WriteStatusLine(CursorPos:ScrPos;Changed:Boolean);
-
-Procedure WriteFileInfo(var lf:LevelFile);
+Procedure WriteFullStatusLine
+                (var lf:LevelFile;Mode:EditorMode;CursorPos,StartPos:ScrPos);
 
 Function Cell2String(s:CellValue):CellString;
 
-Procedure DrawLevel(var A:GameField);
+Procedure DrawLevel(var A:GameField; LeftTop:ScrPos);
 
-Procedure DrawOneCell(var A:GameField; CellPos:ScrPos ; Selected:Boolean);
+Procedure DrawOneCell(var A:GameField; LeftTop,CellPos:ScrPos; Selected:Boolean);
 
-Procedure MoveCursor(var A:GameField;var CursorPos:ScrPos;
+Procedure MoveCursor(var A:GameField;LeftTop:ScrPos;var CursorPos:ScrPos;
                      ColDir,RowDir:Integer);
 
-Procedure ChangeCellUnderCursor(var A:GameField ; CursorPos:ScrPos);
+Procedure ChangeCellUnderCursor(var A:GameField ; LeftTop,CursorPos:ScrPos);
 
 
 IMPLEMENTATION
 
+
+{ initialization procedures and functions }
+
+Function EvalStatusLinePoint(FieldLeftTop:ScrPos):ScrPos;
+var
+  tmp:ScrPos;
+begin
+  tmp.Col:=FieldLeftTop.Col+2;
+  tmp.Row:=FieldLeftTop.Row+FieldHeight+1;
+  EvalStatusLinePoint:=tmp;
+end;
 
 Procedure CreateEmptyLevel(var A:GameField);
 var
@@ -105,38 +106,49 @@ begin
      A[i,j]:=clEmpty;
 end;
 
-Procedure WriteHintLine(HintString:String);
-var
-  i:Word;
-begin
-  TextBackground(edcol_HintLineBG);
-  TextColor(edcol_HintLineText);
-  GotoXY(1,ScreenHeight);
-  Write(HintString);
-  for i:=WhereX to ScreenWidth-1 do
-    Write(#32);
-  CursorOut;
-end;
+{ --- StatusLine procedures --- }
 
-Procedure WriteStatusLine(CursorPos:ScrPos;Changed:Boolean);
+Procedure WriteCursorCoords(CursorPos:ScrPos);
 begin
   TextBackground(edcol_MainBG);
   TextColor(edcol_StLineActive);
-  GotoXY(StatusLinePos.Col,StatusLinePos.Row);
   Write(CursorPos.Col:3,' : ',CursorPos.Row:3);
-  if Changed then
-    Write('   changed   ')
-  else
+end;
+
+Procedure WriteEditorMode(Mode:EditorMode);
+const
+  sign_NoModified='| not modified |';
+  sign_Modified  ='|   MODIFIED   |';
+  sign_Wall = ' WALL  ';
+  sign_Erase= ' ERASE ';
+begin
+  if Mode.Modified then
   begin
     TextColor(edcol_StLineUnactive);
-    Write(' not changed ');
+    Write(sign_NoModified);
+  end
+  else
+  begin
+    TextColor(edcol_StLineActive);
+    Write(sign_Modified);
   end;
+
+  if Mode.Wall then
+    TextColor(edcol_StLineActive)
+  else
+    TextColor(edcol_StLineUnactive);
+  Write(sign_Wall);
+
+  if Mode.Erase then
+    TextColor(edcol_StLineActive)
+  else
+    TextColor(edcol_StLineUnactive);
+  Write(sign_Erase);
 end;
 
 Procedure WriteFileInfo(var lf:LevelFile);
 begin
   TextBackground(edcol_MainBG);
-  GotoXY(FileInfoPos.Col,FileInfoPos.Row);
   TextColor(edcol_StLineUnactive);
   Write(' Current : ');
   TextColor(edcol_StLineActive);
@@ -147,13 +159,41 @@ begin
   Write(FileSize(lf):2,#32);
 end;
 
+Procedure WriteFullStatusLine
+                (var lf:LevelFile;Mode:EditorMode;CursorPos,StartPos:ScrPos);
+begin
+  GotoXY(StartPos.Col,StartPos.Row);
+  WriteCursorCoords(CursorPos);
+  WriteEditorMode(Mode);
+  WriteFileInfo(lf);
+end;
+
+{swithing modes WALL on ERASE off >> WALL off ERASE on >> all off >> ...}
+
+Procedure SwitchModes(var Mode:EditorMode);
+begin
+  with Mode do
+  begin
+    if Wall then
+    begin
+      Wall:= false ; Erase := true ;
+    end
+    else if Erase then
+      Erase := false
+    else
+      Wall := true;
+  end;
+end;
+
 Function Cell2String(s:CellValue):CellString;
 begin
   if s=clEmpty then Cell2String:=imgEmpty;
   if s=clBrick then Cell2String:=imgBrick;
 end;
 
-Procedure DrawLevel(var A:GameField);
+{ fast drawing level after loading }
+
+Procedure DrawLevel(var A:GameField;LeftTop:ScrPos);
 var
   i,j:Word;
 begin
@@ -161,7 +201,7 @@ begin
   TextColor(edcol_MainText);
   for i:=0 to FieldHeight do
   begin
-    GotoXY(Field_LeftUp.Col,Field_LeftUp.Row+i);
+    GotoXY(LeftTop.Col,LeftTop.Row+i);
     for j:=0 to FieldWidth do
     begin
       if A[j,i]=clBrick then
@@ -170,14 +210,18 @@ begin
         TextColor(edcol_MainText);
       Write(Cell2String(A[j,i]));
     end;
+{$ifdef DEBUG}
     Delay(DrawingDelay);
+{$endif}
   end;
 end;
 
+{ drawing one cell during level editing }
 
-Procedure DrawOneCell(var A:GameField; CellPos:ScrPos ; Selected:Boolean);
+Procedure DrawOneCell(var A:GameField;
+                   LeftTop,CellPos:ScrPos ; Selected:Boolean);
 var
-  AbsPos:ScrPos;
+  AbsolutePos:ScrPos;
 begin
   if Selected then
     TextBackground(edcol_FieldCursor)
@@ -187,30 +231,33 @@ begin
     TextColor(edcol_MainText)
   else
     TextColor(edcol_FieldBrick);
-  AbsPos.Col:=ScreenCol(CellPos.Col);
-  AbsPos.Row:=ScreenRow(CellPos.Row);
-  GotoXY(AbsPos.Col,AbsPos.Row);
+  AbsolutePos.Col:=AbsCol(LeftTop,CellPos.Col);
+  AbsolutePos.Row:=AbsRow(LeftTop,CellPos.Row);
+  GotoXY(AbsolutePos.Col,AbsolutePos.Row);
   Write(Cell2String(A[CellPos.Col,CellPos.Row]));
 end;
 
-Procedure MoveCursor(var A:GameField; var CursorPos:ScrPos;
+{ moving cursor during level editing }
+
+Procedure MoveCursor(var A:GameField; LeftTop:ScrPos; var CursorPos:ScrPos;
                      ColDir,RowDir:Integer);
 begin
-  DrawOneCell(A,CursorPos,false);
+  DrawOneCell(A,LeftTop,CursorPos,false);
   CursorPos.Col:=CursorPos.Col+ColDir;
   CursorPos.Row:=CursorPos.Row+RowDir;
-  DrawOneCell(A,CursorPos,true);
+  DrawOneCell(A,LeftTop,CursorPos,true);
 end;
 
-Procedure ChangeCellUnderCursor(var A:GameField;CursorPos:ScrPos);
+{ change cell under cursor under SPACE BAR pressing  }
+
+Procedure ChangeCellUnderCursor(var A:GameField;LeftTop,CursorPos:ScrPos);
 begin
   if A[CursorPos.Col,CursorPos.Row]=clBrick then
     A[CursorPos.Col,CursorPos.Row]:=clEmpty
   else
     A[CursorPos.Col,CursorPos.Row]:=clBrick;
-  DrawOneCell(A,CursorPos,true);
+  DrawOneCell(A,LeftTop,CursorPos,true);
 end;
-
 
 { --- *** --- }
 

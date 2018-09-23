@@ -17,62 +17,162 @@ USES
   CRT,Snake_Draw,Editor_Unit;
 
 CONST
-  YesNoMsgWidth=13;
+
+YesNoMsgWidth=32;
 
 TYPE
   YesNoMsgString=String[YesNoMsgWidth];
 
+CONST
+
+  yesno_Save:YesNoMsgString        = 'Save current level?';
+  yesno_Delete:YesNoMsgString      = 'Delete current level?';
+  yesno_ConfirmSave:YesNoMsgString = 'Level has been modified. Save?';
+  yesno_Clear:YesNoMsgString       = 'Clear current level?';
+  yesno_Exit:YesNoMsgString        = 'Do you wish to exit?';
+
 { procedures and functions }
+
+Procedure WriteHintLine(HintString:String);
 
 Procedure WriteUnactiveMenu;
 
 Function EditorMenu:MenuSelection;
 
-Procedure ClearYesNoArea;
-
-Function YesNoSelect(const Message:YesNoMsgString):MenuSelection;
+Function YesNoSelect(MsgLeftTop:ScrPos;Caption:YesNoMsgString):MenuSelection;
 
 
 IMPLEMENTATION
+
 
 TYPE
 
   MenuItem=record
     Text:String[15];
-    Value:MenuSelection
+    Value:MenuSelection;
+    MenuHint:String[45]
   end;
-
-{ editor menu constants }
 
 CONST
 
+{ editor menu constants }
+
   MenuStart  : ScrPos=( Col: 3 ; Row:1 );
-  YesNoStart : ScrPos=( Col:66 ; Row:10);
 
-  EditorMenuMax=8;
-
-  YesNoMsgHeight=4;
-
+  EditorMenuMax=9;
 
   EditorMenuContent:array[1..EditorMenuMax] of MenuItem  =
-  ((Text:'<-';          Value:mnuEdNavBackward),
-   (Text:'->';          Value:mnuEdNavForward),
-   (Text:'ADD TO END';  Value:mnuEdAddToEnd),
-   (Text:'SAVE';        Value:mnuEdSave),
-   (Text:'DELETE';      Value:mnuEdDelete),
-   (Text:'MOVE <=';     Value:mnuEdMovBackward),
-   (Text:'MOVE =>';     Value:mnuEdMovForward),
-   (Text:'EXIT';        Value:mnuExitRequest));
+  ((Text:'<-';Value:mnuEdNavBackward;
+    MenuHint:' | Navigate - BACKWARD'),
 
-  SureMsg='Are you sure? ';
-  YesMsg = ' Y E S ';
-  NoMsg  = '  N O  ';
+   (Text:'->';Value:mnuEdNavForward;
+    MenuHint:'Navigate - FORWARD'),
+
+   (Text:'ADD';Value:mnuEdAddToEnd;
+    MenuHint:'ADD clear level to the end of file'),
+
+   (Text:'CLEAR';Value:mnuEdAddToEnd;
+    MenuHint:'CLEAR edited level'),
+
+   (Text:'SAVE';Value:mnuEdSave;
+    MenuHint:'SAVE edited level'),
+
+   (Text:'DELETE';Value:mnuEdDelete;
+    MenuHint:'DELETE edited level'),
+
+   (Text:'<=';Value:mnuEdMovBackward;
+    MenuHint:'SAVE and MOVE edited level BACKWARD'),
+
+   (Text:'=>';Value:mnuEdMovForward;
+    MenuHint:'SAVE and MOVE edited level FORWARD'),
+
+   (Text:'EXIT';Value:mnuExitRequest;
+    MenuHint:'EXIT from LEVEL EDITOR'));
 
   MenuUnselMark=' ';
   MenuSelBeginMark='[';
   MenuSelEndMark=']';
 
+{ yes-no function constants  }
+
+  YesNoMsgHeight=6;
+  YesNoSureMsgRel:ScrPos=(Col:3;Row:8);
+  YesNoButtonsRel:ScrPos=(Col:4;Row:5);
+
+  SureMsg='Please confirm! ';
+  YesMsg = ' Y E S ';
+  NoMsg  = '  N O  ';
+
+
+{ hint line constants }
+
+  hint_MainHintLine  =
+  ' | ARROWS - move cursor | SPACE - draw/erase brick | ESC - editor menu |  ';
+  hint_MenuHintLine  =
+  ' EDITOR MENU || LEFT/RIGHT - move cursor | ENTER - select | ESC - resume |';
+  hint_YesNoHintLine =
+  ' UP / DOWN - change || ENTER - select ';
+  hint_SuccessAdd =
+  ' | Successfully ADDED !';
+  hint_SuccessSave =
+  ' | Successfully SAVED !';
+  hint_SuccessDel =
+  ' | Successfully DELETED !';
+
+
+{ --- ---- ---- ---- ---- ---- ---- ---- ---- ---- --- }
+{ ---  EDITOR_MENU unit procedures and functions   --- }
+{ --- ---- ---- ---- ---- ---- ---- ---- ---- ---- --- }
+
+{filling string with SPACR BAR symbols }
+
+Procedure FillString(EndPoint:Word);
+var
+  i:Word;
+begin
+  i:=WhereX;
+  While i<=EndPoint do
+  begin
+    Write(#32);
+    inc(i);
+  end;
+end;
+
+{ write hint line on screen bottom }
+
+Procedure WriteHintLine(HintString:String);
+begin
+  TextBackground(edcol_HintLineBG);
+  TextColor(edcol_HintLineText);
+  GotoXY(1,ScreenHeight);
+  Write(HintString);
+  FillString(ScreenWidth-1);
+  CursorOut;
+end;
+
+{ writing button with need color }
+
+Procedure WriteButton(Item:String;SelColor,UnselColor:Word;Selected:Boolean);
+begin
+  if Selected then
+  begin
+    TextColor(SelColor);
+    Write(MenuSelBeginMark);
+  end else
+  begin
+    TextColor(UnselColor);
+    Write(MenuUnselMark);
+  end;
+  Write(Item);
+  If Selected then
+    Write(MenuSelEndMark)
+  else
+    Write(MenuUnselMark);
+end;
+
+{ --- --- --- --- --- --- --- --- --- }
 { --- EDITOR MENU select function --- }
+{ --- --- --- --- --- --- --- --- --- }
 
 Procedure WriteUnactiveMenu;
 var
@@ -83,28 +183,7 @@ begin
   GotoXY(MenuStart.Col,MenuStart.Row);
   For i:=1 to EditorMenuMax do
     Write(MenuUnselMark,EditorMenuContent[i].Text,MenuUnselMark);
-  for i:=WhereX to ScreenWidth-1 do
-    Write(#32);
-end;
-
-{ --- }
-
-Procedure WriteMenuItem(Item:String;Selected:Boolean);
-begin
-  if Selected then
-  begin
-    TextColor(edcol_MenuSelItem);
-    Write(MenuSelBeginMark);
-  end else
-  begin
-    TextColor(edcol_MenuUnselItem);
-    Write(MenuUnselMark);
-  end;
-  Write(Item);
-  If Selected then
-    Write(MenuSelEndMark)
-  else
-    Write(MenuUnselMark);
+  FillString(ScreenWidth-1);
 end;
 
 { --- }
@@ -118,18 +197,21 @@ begin
   GotoXY(MenuStart.Col,MenuStart.Row);
   While i<MenuPos do
   begin
-    WriteMenuItem(EditorMenuContent[i].Text,false);
+    WriteButton(EditorMenuContent[i].Text,
+                                    edcol_MenuSel,edcol_MenuUnsel,false);
     inc(i);
   end;
-  WriteMenuItem(EditorMenuContent[MenuPos].Text,true);
+  WriteButton(EditorMenuContent[MenuPos].Text,
+                                    edcol_MenuSel,edcol_MenuUnsel,true);
   inc(i);
   While i<=EditorMenuMax do
   begin
-    WriteMenuItem(EditorMenuContent[i].Text,false);
+    WriteButton(EditorMenuContent[i].Text,
+                                    edcol_MenuSel,edcol_MenuUnsel,false);
     inc(i);
   end;
-  for i:=WhereX to ScreenWidth-1 do
-    Write(#32);
+  FillString(ScreenWidth);
+  WriteHintLine(EditorMenuContent[i].MenuHint);
 end;
 
 { --- --- }
@@ -140,7 +222,6 @@ var
   ch:Char;
 begin
   Position:=1;
-  WriteHintLine(hint_MenuHintLine);
   WriteAllMenu(Position);
   repeat
     ch:=ReadKey;
@@ -169,95 +250,73 @@ begin
   until (ch=kbdEnter) or (ch=kbdESC);
 end;
 
+{ --- --- --- --- --- --- --- --- --- }
 { --- YES and NO select function  --- }
+{ --- --- --- --- --- --- --- --- --- }
 
-Procedure FillString;
+Function YesNoMsgAbsBegin(MsgLeftTop:ScrPos;Leng:Word):ScrPos;
 var
-  i:Word;
+  tmp:ScrPos;
 begin
-  for i:=WhereX to YesNoStart.Col+YesNoMsgWidth do
-    Write(#32);
+  tmp.Col:=MsgLeftTop.Col+((yesNoMsgWidth-Leng) div 2);
+  tmp.Row:=MsgLeftTop.Row+2;
+  YesNoMsgAbsBegin:=tmp;
 end;
 
-{ --- }
+{ write YES-NO message base }
 
-Procedure ClearYesNoArea;
+Procedure WriteYesNoMsgBase(MsgLeftTop:ScrPos;Msg:YesNoMsgString);
 var
-  i:Word;
+  MsgAbsPoint:ScrPos;
 begin
-  TextBackground(edcol_MainBG);
-  for i:=YesNoStart.Row to YesNoStart.Row+YesNoMsgHeight do
+  TextBackground(edcol_YesNoBG);
+  TextColor(edcol_YesNoMsgText);
+  ClearRect(MsgLeftTop,YesNoMsgWidth,YesNoMsgHeight);
+  MsgAbsPoint:=YesNoMsgAbsBegin(MsgLeftTop,Length(Msg));
+  GotoXY(MsgAbsPoint.Col,MsgAbsPoint.Row);
+  Write(Msg);
+  GotoXY(MsgLeftTop.Col+YesNoSureMsgRel.Col,
+                             MsgLeftTop.Row+YesNoSureMsgRel.Row);
+  Write(SureMsg);
+end;
+
+{ write buttons YES and NO }
+
+Procedure WriteYesNoButtons(MsgLeftTop:ScrPos;YesSelected:boolean);
+begin
+  GotoXY(MsgLeftTop.Col+YesNoButtonsRel.Col,
+                                    MsgLeftTop.Row+YesNoButtonsRel.Row);
+  If YesSelected then
   begin
-    GotoXY(YesNoStart.Col,i);
-    FillString;
+    WriteButton(YesMsg,edcol_YesNoSel,edcol_YesNoUnsel,true);
+    WriteButton(NoMsg,edcol_YesNoSel,edcol_YesNoUnsel,false);
+  end else
+  begin
+    WriteButton(YesMsg,edcol_YesNoSel,edcol_YesNoUnsel,false);
+    WriteButton(NoMsg,edcol_YesNoSel,edcol_YesNoUnsel,true);
   end;
 end;
 
 { --- }
-
-
-Procedure WriteYesNoMessage(const Message:YesNOMsgString;YesSelected:Boolean);
-var
-  i:Word;
-begin
-  i:=1;
-  TextBackground(edcol_YesNoBG);
-  TextColor(edcol_YesNoMsgText);
-  GotoXY(YesNoStart.Col,YesNoStart.Row);
-  Write(Message);
-  FillString;
-  TextColor(edcol_YesNoUnsel);
-  GotoXY(YesNoStart.Col,YesNoStart.Row+i);
-  Write(SureMsg);
-  inc(i);
-  GotoXY(YesNoStart.Col,YesNoStart.Row+i);
-  Write(#32#32);
-  if YesSelected then
-    begin
-      TextColor(edcol_YesNoSel);
-      Write(MenuSelBeginMark,YesMsg,MenuSelEndMark);
-    end
-  else
-    begin
-      TextColor(edcol_YesNoUnsel);
-      Write(MenuUnselMark,YesMsg,MenuUnselMark);
-    end;
-  FillString;
-  inc(i);
-  GotoXY(YesNoStart.Col,YesNoStart.Row+i);
-  Write(#32#32);
-  if YesSelected then
-    begin
-      TextColor(edcol_YesNoUnsel);
-      Write(MenuUnselMark,NoMsg,MenuUnselMark);
-    end
-  else
-    begin
-      TextColor(edcol_YesNoSel);
-      Write(MenuSelBeginMark,NoMsg,MenuSelEndMark);
-    end;
-  FillString;
-  CursorOut;
-end;
-
-Function YesNoSelect(const Message:YesNoMsgString):MenuSelection;
+Function YesNoSelect(MsgLeftTop:ScrPos;Caption:YesNoMsgString):MenuSelection;
 var
   ch:Char;
   YesSelected:Boolean;
 begin
   YesSelected:=false;
-  WriteYesNoMessage(Message,YesSelected);
+  WriteYesNoMsgBase(MsgLeftTop,Caption);
   WriteHintLine(hint_YesNoHintLine);
+  WriteYesNoButtons(MsgLeftTop,YesSelected);
   repeat
     ch:=ReadKey;
     case ch of
-      kbdUp,kbdDown:
+      kbdLeft,kbdRight:
         begin
           if YesSelected then
             YesSelected:=false
           else
             YesSelected:=true;
-          WriteYesNoMessage(Message,YesSelected);
+          WriteYesNoButtons(MsgLeftTop,YesSelected);
         end;
       kbdEnter:
         if YesSelected then

@@ -41,9 +41,9 @@ TYPE
 
 CONST
 
-{ MS_DOS and Windows CMD screen size }
+{ Windows CMD screen size }
 
-{$ifdef WIN_DOS}
+{$ifdef WINCMD}
   ScreenWidth=80;
   ScreenHeight=25;
 {$endif}
@@ -62,57 +62,88 @@ CONST
   pattBody  : CellPAttern = (SymColor : Magenta;  Image : imgBody);
   pattHead  : CellPAttern = (SymColor : Magenta;  Image : imgHead);
 
-  Field_LeftUp:ScrPos=( Col : 4 ; Row : 3 );
+{ PROCEDURES AND FUNCTIONS }
 
-{ procedures and functions }
+{ clearing rectangle screen area }
+
+Procedure ClearRect(LeftTop:ScrPos;DCol,DRow:Word);
+
+{ moving cursor into screen angle }
 
 Procedure CursorOut;
 
-Procedure DrawFieldBorder;
+{ evaluating point of object drawing - middle of screen }
 
-Function ScreenCol(HPos:Word):Word;
+Function EvalMiddleLeftTop(ObjWidth,ObjHeight:Word):ScrPos;
 
-Function ScreenRow(VPos:Word):Word;
+{ drawing game field border  }
+
+Procedure DrawFieldBorder(LeftTop:ScrPos);
+
+{ evaluating cell's absolute screen position  }
+
+Function AbsCol(LeftTop:ScrPos; HPos:Word):Word;
+Function AbsRow(LeftTop:ScrPos; VPos:Word):Word;
 
 
 IMPLEMENTATION
 
+Procedure ClearRect(LeftTop:ScrPos;DCol,DRow:Word);
+var
+  i,j:Integer;
+begin
+  GotoXY(LeftTop.Col,LeftTop.Row);
+  for i:=LeftTop.Row to LeftTop.Row+DRow do
+  begin
+    GotoXY(LeftTop.Col,i);
+    For j:=LeftTop.Col to LeftTop.Col+DCol do
+      Write(#32);
+  end;
+end;
 
 Procedure CursorOut;
 begin
   GotoXY(ScreenWidth,1);
 end;
 
-Procedure DrawFieldBorder;
+Function EvalMiddleLeftTop(ObjWidth,ObjHeight:Word):ScrPos;
+var
+  tmp:ScrPos;
+begin
+  tmp.Col:=( ScreenWidth - ObjWidth ) div 2;
+  tmp.Row:=( ScreenHeight - ObjHeight) div 2;
+  EvalMiddleLeftTop:=tmp;
+end;
+
+Procedure DrawFieldBorder(LeftTop:ScrPos);
 var
   i:Integer;
 begin
-  GotoXY(Field_LeftUp.Col - CellWidth,Field_LeftUp.Row - 1);
+  GotoXY(LeftTop.Col - CellWidth,LeftTop.Row - 1);
   for i:=0 to FieldWidth + 2 do
     Write(imgBrick);
 
   for i:=0 to FieldHeight do
   begin
-    GotoXY(Field_LeftUp.Col - CellWidth,Field_LeftUp.Row + i);
+    GotoXY(LeftTop.Col - CellWidth,LeftTop.Row + i);
     Write(imgBrick);
-    GotoXY(Field_LeftUp.Col + (FieldWidth + 1)*CellWidth ,
-                                        Field_LeftUp.Row + i);
+    GotoXY(LeftTop.Col + (FieldWidth + 1)*CellWidth , LeftTop.Row + i);
     Write(imgBrick);
   end;
 
-  GotoXY(Field_LeftUp.Col - CellWidth,Field_LeftUp.Row+FieldHeight+1);
+  GotoXY(LeftTop.Col - CellWidth,LeftTop.Row+FieldHeight+1);
   for i:=0 to FieldWidth + 2 do
     Write(imgBrick);
 end;
 
-Function ScreenCol(HPos:Word):Word;
+Function AbsCol(LeftTop:ScrPos; HPos:Word):Word;
 begin
-  ScreenCol:=Field_LeftUp.Col + HPos*CellWidth;
+  AbsCol:=LeftTop.Col + HPos*CellWidth;
 end;
 
-Function ScreenRow(VPos:Word):Word;
+Function AbsRow(LeftTop:ScrPos; VPos:Word):Word;
 begin
-  ScreenRow:=Field_LeftUp.Row + VPos;
+  AbsRow:=LeftTop.Row + VPos;
 end;
 
 END.

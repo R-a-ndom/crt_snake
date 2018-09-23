@@ -25,11 +25,11 @@ CONST
   kbdDown=#80;
 
   kbdESC=#27;
-  kbdSpace=#32;
+  kbdTAB=#9;
+  kbdSPACE=#32;
   kbdENTER=#13;
 
 TYPE
-
 
 { field cell values }
 
@@ -60,7 +60,7 @@ TYPE
                     mnuEdAddToEnd,    { EDITOR - add an empty level to the end }
                     mnuEdSave,        { EDITOR - save level : replace }
                     mnuEdDelete,      { EDITOR - delete level }
-                    mnuEdMovForward,   { EDITOR - move level : forward }
-                    mnuEdMovBackward); { EDITOR - move level : backward }
+                    mnuEdMovForward,  { EDITOR - move level : forward }
+                    mnuEdMovBackward);{ EDITOR - move level : backward }
 
 {$endif}
