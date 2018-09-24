@@ -22,7 +22,7 @@ TYPE
   editor drawing/erasing mode
   modeWall  : drawing bricks during cursor moving;
   modeErase : drawing empty space during cursor moving
-  
+
   all modes off: pressing Space bar changed cell under cursor
 }
 
@@ -126,8 +126,8 @@ end;
 
 Procedure WriteEditorMode(Mode:EditorMode);
 const
-  sign_NoModified='| not modified |';
-  sign_Modified  ='|   MODIFIED   |';
+  sign_NoModified='| not mod |';
+  sign_Modified  ='|   MOD   |';
   sign_Wall = ' WALL  ';
   sign_Erase= ' ERASE ';
 begin
@@ -179,6 +179,7 @@ begin
   WriteCursorCoords(CursorPos);
   WriteEditorMode(Mode);
   WriteFileInfo(lf);
+  CursorOut;
 end;
 
 {swithing modes WALL on ERASE off >> WALL off ERASE on >> all off >> ...}

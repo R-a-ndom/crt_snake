@@ -48,19 +48,20 @@ TYPE
 
 { menu selection items }
 
-  MenuSelection = ( mnuBeginGame,     { MAIN - begin game }
-                    mnuShowHighScore, { MAIN - show high score screen }
-                    mnuResume,        { PAUSE,EDITOR - resume game/editing }
-                    mnuConfirm,       { ALL - confirm }
-                    mnuCancel,        { ALL - cancel }
-                    mnuExitToMainMenu,{ PAUSE - exit to main menu}
-                    mnuExitRequest,   { ALL - exit}
-                    mnuEdNavForward,  { EDITOR - navigation : forward }
-                    mnuEdNavBackward, { EDITOR - navigation : backward }
-                    mnuEdAddToEnd,    { EDITOR - add an empty level to the end }
-                    mnuEdSave,        { EDITOR - save level : replace }
-                    mnuEdDelete,      { EDITOR - delete level }
-                    mnuEdMovForward,  { EDITOR - move level : forward }
-                    mnuEdMovBackward);{ EDITOR - move level : backward }
+  MenuSelection = ( mnuBeginGame,      { MAIN - begin game }
+                    mnuShowHighScore,  { MAIN - show high score screen }
+                    mnuResume,         { PAUSE,EDITOR - resume game/editing }
+                    mnuConfirm,        { ALL - confirm }
+                    mnuCancel,         { ALL - cancel }
+                    mnuResumeNeedReset,{ ALL - need reset editor screen }
+                    mnuExitToMainMenu, { PAUSE - exit to main menu}
+                    mnuExitRequest,    { ALL - exit}
+                    mnuEdNavForward,   { EDITOR - navigation : forward }
+                    mnuEdNavBackward,  { EDITOR - navigation : backward }
+                    mnuEdAddToEnd,     { EDITOR - add an empty level to the end }
+                    mnuEdSave,         { EDITOR - save level : replace }
+                    mnuEdDelete,       { EDITOR - delete level }
+                    mnuEdMovForward,   { EDITOR - move level : forward }
+                    mnuEdMovBackward); { EDITOR - move level : backward }
 
 {$endif}

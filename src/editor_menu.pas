@@ -18,36 +18,14 @@ USES
 
 CONST
 
-  YesNoMsgWidth=32;
+  EditorMenuMax=9;
+
+  YesNoMsgWidth=35;
   YesNoMsgHeight=6;
 
 TYPE
 
   YesNoMsgString=String[YesNoMsgWidth];
-
-CONST
-
-  yesno_Save:YesNoMsgString        = 'Save current level?';
-  yesno_Delete:YesNoMsgString      = 'Delete current level?';
-  yesno_ConfirmSave:YesNoMsgString = 'Level has been modified. Save?';
-  yesno_Clear:YesNoMsgString       = 'Clear current level?';
-  yesno_Exit:YesNoMsgString        = 'Do you wish to exit?';
-
-{ procedures and functions }
-
-Procedure WriteHintLine(HintString:String);
-
-Procedure WriteUnactiveMenu;
-
-Function EditorMenu:MenuSelection;
-
-Function YesNoSelect(MsgLeftTop:ScrPos;Caption:YesNoMsgString):MenuSelection;
-
-
-IMPLEMENTATION
-
-
-TYPE
 
   MenuItem=record
     Text:String[15];
@@ -56,12 +34,6 @@ TYPE
   end;
 
 CONST
-
-{ editor menu constants }
-
-  MenuStart  : ScrPos=( Col: 3 ; Row:1 );
-
-  EditorMenuMax=9;
 
   EditorMenuContent:array[1..EditorMenuMax] of MenuItem  =
   ((Text:'<-';Value:mnuEdNavBackward;
@@ -91,14 +63,63 @@ CONST
    (Text:'EXIT';Value:mnuExitRequest;
     MenuHint:'EXIT from LEVEL EDITOR'));
 
+{ YES_NO confirm messages }
+
+  yesno_Add:YesNoMsgString         = 'ADD empty level to END of file?';
+  yesno_Save:YesNoMsgString        = 'SAVE current level?';
+  yesno_Delete:YesNoMsgString      = 'DELETE current level?';
+  yesno_ConfirmSave:YesNoMsgString = 'Level has been modified. SAVE?';
+  yesno_Clear:YesNoMsgString       = 'CLEAR current level?';
+  yesno_Exit:YesNoMsgString        = 'Do you wish to EXIT?';
+
+{ hintline messages }
+
+  hint_Main  =
+  ' | ARROWS - move cursor | SPACE - draw/erase brick | ESC - editor menu |  ';
+  hint_Menu  =
+  ' EDITOR MENU || LEFT/RIGHT - move cursor | ENTER - select | ESC - resume |';
+  hint_YesNoHelp =
+  ' UP / DOWN - change || ENTER - select ';
+  hint_SuccessAdd =
+  ' | Successfully ADDED !';
+  hint_SuccessSave =
+  ' | Successfully SAVED !';
+  hint_SuccessDel =
+  ' | Successfully DELETED !';
+  hint_SuccessClear =
+  ' | Successfully CLEARED !';
+
+
+{ procedures and functions }
+
+Procedure WriteHintLine(HintString:String);
+
+Procedure WriteUnactiveMenu;
+
+Function EditorMenu:MenuSelection;
+
+Function YesNoSelect(MsgLeftTop:ScrPos;Caption:YesNoMsgString):MenuSelection;
+
+
+IMPLEMENTATION
+
+
+CONST
+
+{ editor menu constants }
+
+  MenuStart  : ScrPos=( Col : 3 ; Row : 1 );
+
+
+
   MenuUnselMark=' ';
   MenuSelBeginMark='[';
   MenuSelEndMark=']';
 
 { yes-no function constants  }
 
-  YesNoSureMsgRel:ScrPos=(Col:3;Row:8);
-  YesNoButtonsRel:ScrPos=(Col:4;Row:5);
+  YesNoSureMsgRel:ScrPos=(Col :12 ; Row : 3);
+  YesNoButtonsRel:ScrPos=(Col : 9 ; Row : 5);
 
   SureMsg='Please confirm! ';
   YesMsg = ' Y E S ';
@@ -107,18 +128,6 @@ CONST
 
 { hint line constants }
 
-  hint_MainHintLine  =
-  ' | ARROWS - move cursor | SPACE - draw/erase brick | ESC - editor menu |  ';
-  hint_MenuHintLine  =
-  ' EDITOR MENU || LEFT/RIGHT - move cursor | ENTER - select | ESC - resume |';
-  hint_YesNoHintLine =
-  ' UP / DOWN - change || ENTER - select ';
-  hint_SuccessAdd =
-  ' | Successfully ADDED !';
-  hint_SuccessSave =
-  ' | Successfully SAVED !';
-  hint_SuccessDel =
-  ' | Successfully DELETED !';
 
 
 { --- ---- ---- ---- ---- ---- ---- ---- ---- ---- --- }
@@ -212,7 +221,7 @@ begin
     inc(i);
   end;
   FillString(ScreenWidth);
-  WriteHintLine(EditorMenuContent[i].MenuHint);
+  WriteHintLine(EditorMenuContent[MenuPos].MenuHint);
 end;
 
 { --- --- }
@@ -259,7 +268,7 @@ Function YesNoMsgAbsBegin(MsgLeftTop:ScrPos;Leng:Word):ScrPos;
 var
   tmp:ScrPos;
 begin
-  tmp.Col:=MsgLeftTop.Col+((yesNoMsgWidth-Leng) div 2);
+  tmp.Col:=MsgLeftTop.Col+((yesNoMsgWidth-Leng) div 2)+1;
   tmp.Row:=MsgLeftTop.Row+2;
   YesNoMsgAbsBegin:=tmp;
 end;
@@ -272,7 +281,7 @@ var
 begin
   TextBackground(edcol_YesNoBG);
   TextColor(edcol_YesNoMsgText);
-  ClearRect(MsgLeftTop,YesNoMsgWidth,YesNoMsgHeight);
+  ClearRect(MsgLeftTop,YesNoMsgWidth+2,YesNoMsgHeight);
   MsgAbsPoint:=YesNoMsgAbsBegin(MsgLeftTop,Length(Msg));
   GotoXY(MsgAbsPoint.Col,MsgAbsPoint.Row);
   Write(Msg);
@@ -296,6 +305,7 @@ begin
     WriteButton(YesMsg,edcol_YesNoSel,edcol_YesNoUnsel,false);
     WriteButton(NoMsg,edcol_YesNoSel,edcol_YesNoUnsel,true);
   end;
+  CursorOut;
 end;
 
 { --- }
@@ -306,7 +316,7 @@ var
 begin
   YesSelected:=false;
   WriteYesNoMsgBase(MsgLeftTop,Caption);
-  WriteHintLine(hint_YesNoHintLine);
+  WriteHintLine(hint_YesNoHelp);
   WriteYesNoButtons(MsgLeftTop,YesSelected);
   repeat
     ch:=ReadKey;

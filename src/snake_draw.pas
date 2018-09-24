@@ -84,7 +84,7 @@ Procedure ClearRect(LeftTop:ScrPos;DCol,DRow:Word);
 
 Procedure CursorOut;
 
-{ evaluating point of object drawing - middle of screen }
+{ evaluating point of object drawing - middle of screen (in symbols) }
 
 Function EvalMiddlePosLeftTop(ObjWidth,ObjHeight:Word):ScrPos;
 

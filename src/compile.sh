@@ -3,8 +3,6 @@
 # CRT_SNAKE building script
 
 debug_key="-g -dDEBUG"
-editor_key="-dEDITOR"
-game_key="-dGAME"
 release_key=''
 
 act_debug_build_game=1
@@ -52,40 +50,42 @@ case $action_num in
 # DEBUG - building a game
 
   $act_debug_build_game)
-     fpc $game_key $debug_key crt_snake.pas
+     fpc $debug_key crt_snake.pas
      ;;
 
 
   $act_debug_build_run_game)
-     fpc $game_key $debug_key crt_snake.pas
+     fpc $debug_key crt_snake.pas
      ./crt_snake
      ;;
 
 # DEBUG - building a level editor
 
   $act_debug_build_editor)
-     fpc $editor_key $debug_key -olevel_editor editor_main.pas
+     rm *.o *.ppu ./level_editor
+     fpc $debug_key -olevel_editor editor_main.pas
      ;;
 
 
   $act_debug_build_run_editor)
-     fpc $editor_key $debug_key -olevel_editor editor_main.pas
+     rm *.o *.ppu ./level_editor
+     fpc $debug_key -olevel_editor editor_main.pas
      ./level_editor
      ;;
 
 # RELEASE - build
 
   $act_release_build_game)
-     fpc $game_key $release_key crt_snake.pas
+     fpc $release_key crt_snake.pas
      ;;
 
   $act_release_build_editor)
-     fpc $editor $release_key -olevel_editor editor_main.pas
+     fpc $release_key -olevel_editor editor_main.pas
      ;;
 
   $act_release_build_all)
-     fpc $game_key $release_key crt_snake.pas
-     fpc $editor $release_key -olevel_editor editor_main.pas
+     fpc $release_key crt_snake.pas
+     fpc $release_key -olevel_editor editor_main.pas
      ;;
 
 # deleting .O and .PPU files
@@ -96,6 +96,7 @@ case $action_num in
     echo $(ls *.ppu)
     remove_all_obj
     echo -e "\nReady!"
+    echo
     ;;
 
 # exit without actions
