@@ -185,12 +185,33 @@ $endif}
     end; { case }
 
     case ProgramState of { editor menu values }
-{      mnuEdNavBackward:
+
+      mnuEdNavBackward:  { viewing file - BACKWARD }
         begin
+          if ((FilePos(lvlf)>1) and
+              ((Mode.Modified=true)  and (YesNoSelect(ScrPar.YesNoLeftTop,yesno_ConfirmSave)=mnuConfirm))) then
+          begin
+            Seek(lvlf,FilePos(lvlf)-2);
+            Read(lvlf,EditedLevel);
+            Mode.Modified:=false;
+            ProgramState:=mnuResumeNeedReset;
+          end
+          else
+            ProgramState:=mnuResumeNeedReset;
         end;
-      mnuEdNavForward:
+
+      mnuEdNavForward:  { viewing file - FORWARD }
         begin
-        end;}
+          if ( (FilePos(lvlf)<FileSize(lvlf) ) and ( (Mode.Modified=true)
+             and (YesNoSelect(ScrPar.YesNoLeftTop,yesno_ConfirmSave)=mnuConfirm))) then
+          begin
+            Read(lvlf,EditedLevel);
+            Mode.Modified:=false;
+            ProgramState:=mnuResumeNeedReset;
+          end
+          else
+            ProgramState:=mnuResumeNeedReset;
+        end;
 
        mnuEdAddToEnd:  { ADDING a new level }
         begin
