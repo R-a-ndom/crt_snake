@@ -14,7 +14,7 @@ INTERFACE
 
 
 USES
-  CRT,Snake_Draw,Editor_Unit;
+  CRT,Snake_Base,Editor_Unit;
 
 CONST
 
@@ -40,28 +40,28 @@ CONST
     MenuHint:' | Navigate - BACKWARD'),
 
    (Text:'->';Value:mnuEdNavForward;
-    MenuHint:'Navigate - FORWARD'),
+    MenuHint:' | Navigate - FORWARD'),
 
    (Text:'ADD';Value:mnuEdAddToEnd;
-    MenuHint:'ADD clear level to the end of file'),
+    MenuHint:' | ADD clear level to the end of file'),
 
    (Text:'CLEAR';Value:mnuEdAddToEnd;
-    MenuHint:'CLEAR edited level'),
+    MenuHint:' | CLEAR edited level'),
 
    (Text:'SAVE';Value:mnuEdSave;
-    MenuHint:'SAVE edited level'),
+    MenuHint:' | SAVE edited level'),
 
    (Text:'DELETE';Value:mnuEdDelete;
-    MenuHint:'DELETE edited level'),
+    MenuHint:' | DELETE edited level'),
 
    (Text:'<=';Value:mnuEdMovBackward;
-    MenuHint:'SAVE and MOVE edited level BACKWARD'),
+    MenuHint:' | SAVE and MOVE edited level BACKWARD'),
 
    (Text:'=>';Value:mnuEdMovForward;
-    MenuHint:'SAVE and MOVE edited level FORWARD'),
+    MenuHint:' | SAVE and MOVE edited level FORWARD'),
 
    (Text:'EXIT';Value:mnuExitRequest;
-    MenuHint:'EXIT from LEVEL EDITOR'));
+    MenuHint:' | EXIT from LEVEL EDITOR'));
 
 { YES_NO confirm messages }
 
@@ -77,9 +77,9 @@ CONST
   hint_Main  =
   ' | ARROWS - move cursor | SPACE - draw/erase brick | ESC - editor menu |  ';
   hint_Menu  =
-  ' EDITOR MENU || LEFT/RIGHT - move cursor | ENTER - select | ESC - resume |';
+  ' | EDITOR MENU || LEFT/RIGHT - move cursor | ENTER - select | ESC - resume |';
   hint_YesNoHelp =
-  ' UP / DOWN - change || ENTER - select ';
+  ' | ARROWS / TAB - change | ENTER - select ';
   hint_SuccessAdd =
   ' | Successfully ADDED !';
   hint_SuccessSave =
@@ -275,7 +275,7 @@ end;
 
 { write YES-NO message base }
 
-Procedure WriteYesNoMsgBase(MsgLeftTop:ScrPos;Msg:YesNoMsgString);
+Procedure WriteYesNoMsgWindow(MsgLeftTop:ScrPos;Msg:YesNoMsgString);
 var
   MsgAbsPoint:ScrPos;
 begin
@@ -315,13 +315,13 @@ var
   YesSelected:Boolean;
 begin
   YesSelected:=false;
-  WriteYesNoMsgBase(MsgLeftTop,Caption);
+  WriteYesNoMsgWindow(MsgLeftTop,Caption);
   WriteHintLine(hint_YesNoHelp);
   WriteYesNoButtons(MsgLeftTop,YesSelected);
   repeat
     ch:=ReadKey;
     case ch of
-      kbdLeft,kbdRight:
+      kbdLeft,kbdRight,kbdTAB:
         begin
           if YesSelected then
             YesSelected:=false

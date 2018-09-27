@@ -14,7 +14,7 @@ INTERFACE
 
 
 Uses
-  CRT,Snake_draw;
+  CRT,Snake_Base,Snake_File;
 
 TYPE
 
@@ -67,8 +67,6 @@ DrawingDelay=20;
 
 Function EvalStatusLinePoint(FieldLeftTop:ScrPos):ScrPos;
 
-Procedure CreateEmptyLevel(var A:GameField);
-
 Function Cell2String(s:CellValue):CellString;
 
 Procedure WriteFullStatusLine
@@ -97,49 +95,41 @@ Function EvalStatusLinePoint(FieldLeftTop:ScrPos):ScrPos;
 var
   tmp:ScrPos;
 begin
-  tmp.Col:=FieldLeftTop.Col+2;
+  tmp.Col:=FieldLeftTop.Col+1;
   tmp.Row:=FieldLeftTop.Row+FieldHeight+1;
   EvalStatusLinePoint:=tmp;
 end;
 
-{ --- }
-
-Procedure CreateEmptyLevel(var A:GameField);
-var
-  i,j:Word;
-begin
-  for i:=0 to FieldWidth do
-   for j:=0 to FieldHeight do
-     A[i,j]:=clEmpty;
-end;
 
 { --- StatusLine procedures --- }
 
 Procedure WriteCursorCoords(CursorPos:ScrPos);
 begin
+  inc(CursorPos.Col);
+  inc(CursorPos.Row);
   TextBackground(edcol_MainBG);
   TextColor(edcol_StLineActive);
-  Write(CursorPos.Col:3,' : ',CursorPos.Row:3);
+  Write(CursorPos.Col:3,' :',CursorPos.Row:3);
 end;
 
 { --- }
 
 Procedure WriteEditorMode(Mode:EditorMode);
 const
-  sign_NoModified='| not mod |';
-  sign_Modified  ='|   MOD   |';
+  sign_NoModified='| not mod';
+  sign_Modified  ='|   MOD  ';
   sign_Wall = ' WALL  ';
   sign_Erase= ' ERASE ';
 begin
   if Mode.Modified then
   begin
-    TextColor(edcol_StLineUnactive);
-    Write(sign_NoModified);
+    TextColor(edcol_StLineActive);
+    Write(sign_Modified);
   end
   else
   begin
-    TextColor(edcol_StLineActive);
-    Write(sign_Modified);
+    TextColor(edcol_StLineUnactive);
+    Write(sign_NoModified);
   end;
 
   if Mode.Wall then
@@ -161,13 +151,13 @@ Procedure WriteFileInfo(var lf:LevelFile);
 begin
   TextBackground(edcol_MainBG);
   TextColor(edcol_StLineUnactive);
-  Write(' Current : ');
+  Write('| Current : ');
   TextColor(edcol_StLineActive);
   Write(FilePos(lf):2);
   TextColor(edcol_StLineUnactive);
   Write(' | All : ');
   TextColor(edcol_StLineActive);
-  Write(FileSize(lf):2,#32);
+  Write(FileSize(lf):2);
 end;
 
 { --- }

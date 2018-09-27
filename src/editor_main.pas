@@ -11,7 +11,7 @@ level editor main file
 Program LevelEditor;
 
 USES
-  CRT,Snake_Draw,Editor_Unit,Editor_File,Editor_Menu;
+  CRT,Snake_Base,Snake_File,Editor_Unit,Editor_Menu;
 
 TYPE
   ScreenParams=record
@@ -47,8 +47,7 @@ end;
 
 Procedure GetScreenParams(var A:ScreenParams);
 begin
-  A.FieldLeftTop := EvalMiddlePosLeftTop(FieldWidth+1,FieldHeight+1);
-  A.FieldLeftTop.Col := A.FieldLeftTop.Col div CellWidth;
+  A.FieldLeftTop := EvalMiddlePosLeftTop( FieldWidth*CellWidth + 1,FieldHeight+1 );
   A.StLinePos    := EvalStatusLinePoint(A.FieldLeftTop);
   A.YesNoLeftTop := EvalMiddlePosLeftTop(YesNoMsgWidth,YesNoMsgHeight);
 end;
@@ -105,7 +104,8 @@ VAR
 
 { --------------------
   --- MAIN PROGRAM ---
-  -------------------- }
+  --------------------
+}
 
 BEGIN
 
@@ -119,9 +119,9 @@ BEGIN
   ClrScr;
   TextColor(edcol_FieldBrick);
 
-{$ifdef DEBUG}
+{ $ifdef DEBUG
   WriteScreenParams(ScrPar);
-{$endif}
+$endif}
 
   DrawFieldBorder(ScrPar.FieldLeftTop);
   ProgramState:=mnuResume;
@@ -138,41 +138,49 @@ BEGIN
       kbdUp:  { UP key }
         if CursorPos.Row>0 then
         begin
-          MoveCursor(EditedLevel,ScrPar.FieldLeftTop,CursorPos,0,-1);
+          MoveCursor(EditedLevel,CursorPos,ScrPar.FieldLeftTop,0,-1);
           WriteFullStatusLine(lvlf,ScrPar.StLinePos,CursorPos,Mode);
         end;
+
       kbdDown: { DOWN key}
         if CursorPos.Row<FieldHeight then
         begin
-          MoveCursor(EditedLevel,ScrPar.FieldLeftTop,CursorPos,0,1);
+          MoveCursor(EditedLevel,CursorPos,ScrPar.FieldLeftTop,0,1);
           WriteFullStatusLine(lvlf,ScrPar.StLinePos,CursorPos,Mode);
         end;
+
       kbdRight: { RIGHT key}
         if CursorPos.Col<FieldWidth then
         begin
-          MoveCursor(EditedLevel,ScrPar.FieldLeftTop,CursorPos,1,0);
+          MoveCursor(EditedLevel,CursorPos,ScrPar.FieldLeftTop,1,0);
           WriteFullStatusLine(lvlf,ScrPar.StLinePos,CursorPos,Mode);
         end;
+
       kbdLeft: { LEFT key }
         if CursorPos.Col>0 then
         begin
-          MoveCursor(EditedLevel,ScrPar.FieldLeftTop,CursorPos,-1,0);
+          MoveCursor(EditedLevel,CursorPos,ScrPar.FieldLeftTop,-1,0);
           WriteFullStatusLine(lvlf,ScrPar.StLinePos,CursorPos,Mode);
         end;
+
       kbdTab:  { TAB key }
         begin
           SwitchModes(Mode);
           WriteFullStatusLine(lvlf,ScrPar.StLinePos,CursorPos,Mode);
         end;
+
       kbdSpace: { SPACE BAR - drawing / erasing bricks }
         begin
           ChangeCellUnderCursor(EditedLevel,ScrPar.FieldLeftTop,CursorPos);
           if not Mode.Modified then
             Mode.Modified:=true;
+          WriteFullStatusLine(lvlf,ScrPar.StLinePos,CursorPos,Mode);
         end;
+
       kbdESC: { enter to EDITOR MENU }
         begin
           ProgramState:=EditorMenu;
+          WriteUnactiveMenu;
         end;
     end; { case }
 
@@ -189,33 +197,19 @@ BEGIN
           if (YesNoSelect(ScrPar.YesNoLeftTop,yesno_Add)=mnuConfirm) then
           begin
             tmp_num:=FilePos(lvlf);
-            Seek(lvlf,FileSize(lvlf));
-            CreateEmptyLevel(NewLevel);
-            Write(lvlf,NewLevel);
-            Seek(lvlf,tmp_num);
-            WriteHintLine(hint_SuccessAdd);
-          end
-          else
-          begin
-            ResetEditorScreen(lvlf,EditedLevel,Mode,CursorPos,ScrPar);
+            AddEmptyLevel(lvlf,tmp_num);
           end;
-            ProgramState:=mnuResumeNeedReset;
+          ProgramState:=mnuResumeNeedReset;
         end;
 
        mnuEdSave: { SAVING edited level }
          begin
            if (YesNoSelect(ScrPar.YesNoLeftTop,yesno_Save)=mnuConfirm) then
            begin
-             Seek(lvlf,FilePos(lvlf)-1);
-             Write(lvlf,EditedLevel);
-             WriteHintLine(hint_SuccessSave);
+             SaveLevel(lvlf,EditedLevel);
              Mode.Modified:=false;
-           end
-           else
-           begin
-             ResetEditorScreen(lvlf,EditedLevel,Mode,CursorPos,ScrPar);
            end;
-             ProgramState:=mnuResumeNeedReset;
+           ProgramState:=mnuResumeNeedReset;
          end;
 {      mnuEdDelete:
         begin
@@ -229,10 +223,7 @@ BEGIN
       mnuExitRequest:
         begin
           if (YesNoSelect(ScrPar.YesNoLeftTop,yesno_Exit)<>mnuConfirm) then
-          begin
             ProgramState:=mnuResumeNeedReset;
-            ResetEditorScreen(lvlf,EditedLevel,Mode,CursorPos,ScrPar);
-          end;
         end;
 
     end; { case }

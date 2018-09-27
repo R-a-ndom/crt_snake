@@ -9,66 +9,105 @@ game objects drawing unit
 
 }
 
-unit Snake_Draw;
+unit Snake_Base;
+
 
 INTERFACE
+
 
 USES
   CRT;
 
-{$I crt_snake.inc}
-
 CONST
 
-{ one cell size in symbols }
+  { game field size - 30 * 20 }
+
+  FieldWidth=29;
+  FieldHeight=19;
+
+  { one cell size in symbols }
 
   CellWidth=2;
 
+  { keyboard codes }
+
+  kbdLeft  = #75;
+  kbdRight = #77;
+  kbdUp    = #72;
+  kbdDown  = #80;
+
+  kbdF1    = #59;
+  kbdESC   = #27;
+  kbdTAB   = #9;
+  kbdSPACE = #32;
+  kbdENTER = #13;
+
+  { game pbject strings }
+
+  imgEmpty = '::';
+  imgBrick = '[]';
+  imgFruit = 'GO';
+  imgCoin  = '$$';
+  imgBody  = '<>';
+  imgHead  = '@@';
+
+
 TYPE
 
-{ decart screen position }
+{ field cell values }
+
+  CellValue = ( clEmpty,  {empty cell}
+                clBrick,  {brick cell}
+                clFriut,  {friut - for growing}
+                clCoin,   {coin - for score}
+                clBody,   {snake's body}
+                clHead ); {snake's head}
+
+  { game field array }
+
+  GameField = array[0..FieldWidth,0..FieldHeight] of CellValue;
+
+ { rectangle screen coordinate }
 
   ScrPos=record
     Col,Row:Word
   end;
 
-  ScreenParams=record
-{$ifdef EDITOR}
-    FieldLeftTop,StLineStart,YesNoMsgLeftTop:ScrPos
-{$else}
-    FieldLeftTop,YesNoMsgLeftTop:ScrPos
-{$endif}
-  end;
+  { string - game object }
 
   CellString=string[CellWidth];
-
+{
   CellPattern=record
     SymColor: Byte;
     Image:CellString
   end;
+}
+  { menu selection items }
 
-CONST
+  MenuSelection = ( mnuBeginGame,      { MAIN - begin game }
+                    mnuShowHighScore,  { MAIN - show high score screen }
+                    mnuResume,         { PAUSE,EDITOR - resume game/editing }
+                    mnuConfirm,        { ALL - confirm }
+                    mnuCancel,         { ALL - cancel }
+                    mnuResumeNeedReset,{ ALL - need reset editor screen }
+                    mnuExitToMainMenu, { PAUSE - exit to main menu}
+                    mnuExitRequest,    { ALL - exit}
+                    mnuEdNavForward,   { EDITOR - navigation : forward }
+                    mnuEdNavBackward,  { EDITOR - navigation : backward }
+                    mnuEdAddToEnd,     { EDITOR - add an empty level to the end }
+                    mnuEdSave,         { EDITOR - save level : replace }
+                    mnuEdDelete,       { EDITOR - delete level }
+                    mnuEdMovForward,   { EDITOR - move level : forward }
+                    mnuEdMovBackward); { EDITOR - move level : backward }
 
-{ Windows CMD screen size }
 
-{$ifdef WINCMD}
-  ScreenWidth=80;
-  ScreenHeight=25;
-{$endif}
-
-  imgEmpty = '::';
-  imgBrick = '[]';
-  imgFruit = 'OO';
-  imgCoin  = '$$';
-  imgBody  = '<>';
-  imgHead  = '@@';
-
-  pattEmpty : CellPAttern = (SymColor : DarkGray; Image : imgEmpty);
+{  pattEmpty : CellPAttern = (SymColor : DarkGray; Image : imgEmpty);
   pattBrick : CellPAttern = (SymColor : White;    Image : imgBrick);
   pattFruit : CellPAttern = (SymColor : Red;      Image : imgFruit);
   pattCoin  : CellPAttern = (SymColor : Yellow;   Image : imgCoin);
   pattBody  : CellPAttern = (SymColor : Magenta;  Image : imgBody);
   pattHead  : CellPAttern = (SymColor : Magenta;  Image : imgHead);
+}
 
 { PROCEDURES AND FUNCTIONS }
 
@@ -96,6 +135,10 @@ Procedure DrawFieldBorder(LeftTop:ScrPos);
 
 Function AbsCol(LeftTop:ScrPos; HPos:Word):Word;
 Function AbsRow(LeftTop:ScrPos; VPos:Word):Word;
+
+{ creating an empty level array }
+
+Procedure CreateEmptyLevel(var A:GameField);
 
 
 IMPLEMENTATION
@@ -141,7 +184,7 @@ var
   tmp:ScrPos;
 begin
   tmp.Col:=( ScreenWidth - ObjWidth ) div 2;
-  tmp.Row:=( ScreenHeight - ObjHeight) div 2;
+  tmp.Row:=(( ScreenHeight - ObjHeight) div 2) + 1;
   EvalMiddlePosLeftTop:=tmp;
 end;
 
@@ -181,6 +224,18 @@ Function AbsRow(LeftTop:ScrPos; VPos:Word):Word;
 begin
   AbsRow:=LeftTop.Row + VPos;
 end;
+
+{ --- }
+
+Procedure CreateEmptyLevel(var A:GameField);
+var
+  i,j:Word;
+begin
+  for i:=0 to FieldWidth do
+   for j:=0 to FieldHeight do
+     A[i,j]:=clEmpty;
+end;
+
 
 { --- --- --- --- --- }
 

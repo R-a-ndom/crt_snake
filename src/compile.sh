@@ -3,7 +3,7 @@
 # CRT_SNAKE building script
 
 debug_key="-g -dDEBUG"
-release_key=''
+release_key="-o3"
 
 act_debug_build_game=1
 act_debug_build_run_game=2
@@ -11,20 +11,21 @@ act_debug_build_editor=3
 act_debug_build_run_editor=4
 act_release_build_game=5
 act_release_build_editor=6
+act_release_build_all=6
 act_remove_all_obj=0
 
 write_promt() {
   echo "Please, choose a number:"
-  echo "[    1    ] - DEBUG  - <    BUILD    > GAME"
-  echo "[    2    ] - DEBUG  - <BUILD AND RUN> GAME"
+  echo "[    1    ] - DEBUG   - <    build    > GAME"
+  echo "[    2    ] - DEBUG   - < build / run > GAME"
   echo
-  echo "[    3    ] - DEBUG  - <    BUILD    > EDITOR "
-  echo "[    4    ] - DEBUG  - <BUILD AND RUN> EDITOR"
+  echo "[    3    ] - DEBUG   - <    build    > EDITOR "
+  echo "[    4    ] - DEBUG   - < build / run > EDITOR"
   echo
-  echo "[    5    ] - RELEASE - <    BUILD    > GAME"
-  echo "[    6    ] - RELEASE - <    BUILD    > EDITOR"
+  echo "[    5    ] - RELEASE - <    build    > GAME"
+  echo "[    6    ] - RELEASE - <    build    > EDITOR"
   echo
-  echo "[    6    ] - RELEASE - <    BUILD    > ALL"
+  echo "[    7    ] - RELEASE - <    build    > ALL"
   echo
   echo
   echo "[    0    ] - Deleting object files and binaries"
@@ -62,15 +63,14 @@ case $action_num in
 # DEBUG - building a level editor
 
   $act_debug_build_editor)
-     rm *.o *.ppu ./level_editor
+     rm *.o *.ppu ./level_editor 2>/dev/null
      fpc $debug_key -olevel_editor editor_main.pas
      ;;
 
 
   $act_debug_build_run_editor)
-     rm *.o *.ppu ./level_editor
-     fpc $debug_key -olevel_editor editor_main.pas
-     ./level_editor
+     rm *.o *.ppu ./level_editor 2>/dev/null
+     fpc $debug_key -olevel_editor editor_main.pas && ./level_editor
      ;;
 
 # RELEASE - build
