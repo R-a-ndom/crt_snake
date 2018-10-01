@@ -19,7 +19,7 @@ TYPE
   end;
 
 CONST
-  LevelFileName='./crt_snake.lvl';
+  LevelFileName='crt_snake.lvl';
 
 { main file PROCEDURES AND FUNCTIONS }
 
@@ -47,9 +47,10 @@ end;
 
 Procedure GetScreenParams(var A:ScreenParams);
 begin
-  A.FieldLeftTop := EvalMiddlePosLeftTop( FieldWidth*CellWidth + 1,FieldHeight+1 );
-  A.StLinePos    := EvalStatusLinePoint(A.FieldLeftTop);
-  A.YesNoLeftTop := EvalMiddlePosLeftTop(YesNoMsgWidth,YesNoMsgHeight);
+  A.FieldLeftTop:=EvalMiddlePosLeftTop
+                       (FieldWidth*CellWidth + 1,FieldHeight+1);
+  A.StLinePos   :=EvalStatusLinePoint(A.FieldLeftTop);
+  A.YesNoLeftTop:=EvalMiddlePosLeftTop(YesNoMsgWidth,YesNoMsgHeight);
 end;
 
 { editor initialisation }
@@ -93,8 +94,8 @@ end;
 { --- --- --- }
 
 VAR
-  NewLevel,EditedLevel : GameField;
-  lvlf:File of GameField;
+  EditedLevel : GameField;
+  lvlf:LevelFile;
   Mode:EditorMode=(Modified:False;Wall:False;Erase:False);
   tmp_num:Word;
   ScrPar:ScreenParams;
@@ -111,7 +112,7 @@ BEGIN
 
   EditorInit(lvlf,ScrPar);
   Seek(lvlf,FileSize(lvlf)-1);
-  Read(lvlf,EditedLevel);
+  LoadLevel(lvlf,EditedLevel);
 
   CursorPos.Row:=0;
   CursorPos.Col:=0;
@@ -186,13 +187,21 @@ $endif}
 
     case ProgramState of { editor menu values }
 
+      mnuShowHelpScreen:
+        begin
+          WriteHintLine(hint_HelpScreen);
+          ShowHelpScreen(ScrPar.FieldLeftTop);
+          ProgramState:=mnuResumeNeedReset;
+        end;
+
       mnuEdNavBackward:  { viewing file - BACKWARD }
         begin
           if ((FilePos(lvlf)>1) and
-              ((Mode.Modified=true)  and (YesNoSelect(ScrPar.YesNoLeftTop,yesno_ConfirmSave)=mnuConfirm))) then
+             ((Mode.Modified=true) and
+              (YesNoSelect(ScrPar.YesNoLeftTop,yesno_ConfirmSave)=mnuConfirm))) then
           begin
             Seek(lvlf,FilePos(lvlf)-2);
-            Read(lvlf,EditedLevel);
+            SaveLevel(lvlf,EditedLevel);
             Mode.Modified:=false;
             ProgramState:=mnuResumeNeedReset;
           end
@@ -205,7 +214,7 @@ $endif}
           if ( (FilePos(lvlf)<FileSize(lvlf) ) and ( (Mode.Modified=true)
              and (YesNoSelect(ScrPar.YesNoLeftTop,yesno_ConfirmSave)=mnuConfirm))) then
           begin
-            Read(lvlf,EditedLevel);
+            LoadLevel(lvlf,EditedLevel);
             Mode.Modified:=false;
             ProgramState:=mnuResumeNeedReset;
           end
@@ -243,7 +252,10 @@ $endif}
         end;  }
       mnuExitRequest:
         begin
-          if (YesNoSelect(ScrPar.YesNoLeftTop,yesno_Exit)<>mnuConfirm) then
+          if ((YesNoSelect(ScrPar.YesNoLeftTop,yesno_Exit)<>mnuConfirm) and
+             ((Mode.Modified=true) and
+              (YesNoSelect(ScrPar.YesNoLeftTop,yesno_ConfirmSave)=mnuConfirm)))
+          then
             ProgramState:=mnuResumeNeedReset;
         end;
 

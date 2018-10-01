@@ -18,7 +18,7 @@ USES
 
 CONST
 
-  EditorMenuMax=9;
+  EditorMenuMax=10;
 
   YesNoMsgWidth=35;
   YesNoMsgHeight=6;
@@ -36,7 +36,10 @@ TYPE
 CONST
 
   EditorMenuContent:array[1..EditorMenuMax] of MenuItem  =
-  ((Text:'<-';Value:mnuEdNavBackward;
+  ((Text:'HELP';Value:mnuShowHelpScreen;
+    MenuHint:' | View HELP SCREEN'),
+
+   (Text:'<-';Value:mnuEdNavBackward;
     MenuHint:' | Navigate - BACKWARD'),
 
    (Text:'->';Value:mnuEdNavForward;
@@ -75,11 +78,13 @@ CONST
 { hintline messages }
 
   hint_Main  =
-  ' | ARROWS - move cursor | SPACE - draw/erase brick | ESC - editor menu |  ';
+  ' | ARROWS - move cursor | SPACE - draw/erase brick | ESC - editor menu |';
   hint_Menu  =
   ' | EDITOR MENU || LEFT/RIGHT - move cursor | ENTER - select | ESC - resume |';
+  hint_HelpScreen =
+  ' | HELP SCREEN - press any key to continue';
   hint_YesNoHelp =
-  ' | ARROWS / TAB - change | ENTER - select ';
+  ' | ARROWS / TAB - change | ENTER - select';
   hint_SuccessAdd =
   ' | Successfully ADDED !';
   hint_SuccessSave =

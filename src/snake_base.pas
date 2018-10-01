@@ -22,7 +22,7 @@ CONST
 
   { game field size - 30 * 20 }
 
-  FieldWidth=29;
+  FieldWidth=31;
   FieldHeight=19;
 
   { one cell size in symbols }
@@ -51,6 +51,9 @@ CONST
   imgBody  = '<>';
   imgHead  = '@@';
 
+  { level on disk size }
+
+  LevelSizeOnDisk = 20;
 
 TYPE
 
@@ -66,6 +69,12 @@ TYPE
   { game field array }
 
   GameField = array[0..FieldWidth,0..FieldHeight] of CellValue;
+
+  { level recorded in file }
+
+  LevelUnit = LongWord;
+
+  SnakeLevel = array[1..LevelSizeOnDisk] of LevelUnit;
 
  { rectangle screen coordinate }
 
@@ -89,6 +98,7 @@ TYPE
                     mnuResume,         { PAUSE,EDITOR - resume game/editing }
                     mnuConfirm,        { ALL - confirm }
                     mnuCancel,         { ALL - cancel }
+                    mnuShowHelpScreen, { ALL - show help screen }
                     mnuResumeNeedReset,{ ALL - need reset editor screen }
                     mnuExitToMainMenu, { PAUSE - exit to main menu}
                     mnuExitRequest,    { ALL - exit}
@@ -99,15 +109,6 @@ TYPE
                     mnuEdDelete,       { EDITOR - delete level }
                     mnuEdMovForward,   { EDITOR - move level : forward }
                     mnuEdMovBackward); { EDITOR - move level : backward }
-
-
-{  pattEmpty : CellPAttern = (SymColor : DarkGray; Image : imgEmpty);
-  pattBrick : CellPAttern = (SymColor : White;    Image : imgBrick);
-  pattFruit : CellPAttern = (SymColor : Red;      Image : imgFruit);
-  pattCoin  : CellPAttern = (SymColor : Yellow;   Image : imgCoin);
-  pattBody  : CellPAttern = (SymColor : Magenta;  Image : imgBody);
-  pattHead  : CellPAttern = (SymColor : Magenta;  Image : imgHead);
-}
 
 { PROCEDURES AND FUNCTIONS }
 

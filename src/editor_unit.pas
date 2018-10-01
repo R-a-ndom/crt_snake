@@ -26,7 +26,6 @@ TYPE
   all modes off: pressing Space bar changed cell under cursor
 }
 
-
 EditorMode=record
   Modified,Wall,Erase : boolean
 end;
@@ -38,7 +37,7 @@ CONST
 
 edcol_MainBG=Black;
 edcol_MainText=LightGray;
-
+edcol_HelpText=White;
 edcol_MenuBG=LightCyan;
 edcol_MenuUnactive=DarkGray;
 edcol_MenuUnsel=White;
@@ -71,6 +70,8 @@ Function Cell2String(s:CellValue):CellString;
 
 Procedure WriteFullStatusLine
     (var lf:LevelFile; StLineStart,CursorPos:ScrPos; Mode:EditorMode);
+
+Procedure ShowHelpScreen(LeftTop:ScrPos);
 
 Procedure SwitchModes(var Mode:EditorMode);
 
@@ -116,8 +117,8 @@ end;
 
 Procedure WriteEditorMode(Mode:EditorMode);
 const
-  sign_NoModified='| not mod';
-  sign_Modified  ='|   MOD  ';
+  sign_NoModified=' |not mod';
+  sign_Modified  =' |  MOD  ';
   sign_Wall = ' WALL  ';
   sign_Erase= ' ERASE ';
 begin
@@ -170,6 +171,45 @@ begin
   WriteEditorMode(Mode);
   WriteFileInfo(lf);
   CursorOut;
+end;
+
+{ --- HELP screen --- }
+
+Procedure ShowHelpScreen(LeftTop:ScrPos);
+begin
+
+  TextColor(edcol_FieldBrick);
+  DrawFieldBorder(LeftTop);
+
+  TextBackground(edcol_MainBG);
+  TextColor(edcol_HelpText);
+  ClearRect(LeftTop, FieldWidth*CellWidth+1, FieldHeight);
+  GotoXY(LeftTop.Col,LeftTop.Row);
+  Write('HELP screen');
+
+  LeftTop.Row:=LeftTop.Row+2;
+  GotoXY(LeftTop.Col,LeftTop.Row);
+  Write('ARROW KEYS - moving cursor ');
+
+  LeftTop.Row:=LeftTop.Row+2;
+  GotoXY(LeftTop.Col,LeftTop.Row);
+  Write('TAB - switch draw modes');
+
+  LeftTop.Row:=LeftTop.Row+2;
+  GotoXY(LeftTop.Col,LeftTop.Row);
+  Write('ESC - enter to EDITOR MENU');
+
+  LeftTop.Row:=LeftTop.Row+2;
+  GotoXY(LeftTop.Col,LeftTop.Row);
+  Write('ARROW KEYS - moving cursor ');
+
+ { LeftTop.Row:=LeftTop.Row+2;
+  GotoXY(LeftTop.Col,LeftTop.Row);
+  Write('Press any key to continue...');}
+
+  CursorOut;
+  repeat
+  until KeyPressed;
 end;
 
 {swithing modes WALL on ERASE off >> WALL off ERASE on >> all off >> ...}
@@ -255,7 +295,7 @@ begin
   DrawOneCell(A,LeftTop,CursorPos,true);
 end;
 
-{ change cell under cursor under SPACE BAR pressing  }
+{ change cell under cursor after SPACE BAR pressing  }
 
 Procedure ChangeCellUnderCursor(var A:GameField;LeftTop,CursorPos:ScrPos);
 begin

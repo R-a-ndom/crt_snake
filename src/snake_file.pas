@@ -18,23 +18,85 @@ Uses
 
 TYPE
 
-  LevelFile = file of GameField;
+  LevelFile = file of SnakeLevel;
 
 { --- procedures and functions --- }
 
 Procedure CreateNewFile(var lf:LevelFile);
 
+Procedure CompressLevel(var Field:GameField;var Level:SnakeLevel);
+
+Procedure DecompressLevel(var Level:SnakeLevel;var Field:GameField);
+
 Procedure AddEmptyLevel(var lf:LevelFile;CurrentPos:Word);
 
-Procedure SaveLevel(var lf:LevelFile;A:GameField);
+Procedure SaveLevel(var lf:LevelFile;var A:GameField);
 
+Procedure LoadLevel(var lf:LevelFile;var A:GameField);
 
 IMPLEMENTATION
 
 
+Procedure CreateEmptyLevel(var A:SnakeLevel);
+var
+  i:Word;
+begin
+  for i:=1 to LevelSizeOnDisk do
+    A[i]:=0;
+end;
+
+{ compress field array into level array  }
+
+Procedure CompressLevel(var Field:GameField;var Level:SnakeLevel);
+var
+  i,j:Word;
+  UnitValue,Mask:LevelUnit;
+begin
+  for i:=0 to FieldHeight do
+  begin
+    UnitValue:=0;
+    For j:=0 to FieldWidth do
+    begin
+      if Field[j,i]=clBrick then
+        Mask:=1
+      else
+        Mask:=0;
+      UnitValue:=(UnitValue or Mask) shl 1;
+    end;
+    Level[i+1]:=UnitValue;
+  end;
+end;
+
+{ --- }
+
+Procedure DecompressLevel(var Level:SnakeLevel;var Field:GameField);
+var
+  i,j:Word;
+  tmp:LevelUnit;
+begin
+  for i:=0 to FieldHeight do
+  begin
+    tmp:=Level[i+1];
+    for j:=FieldWidth downto 1 do
+    begin
+      if tmp mod 2 = 0 then
+        Field[j,i]:=clEmpty
+      else
+        Field[j,i]:=clBrick;
+    tmp := tmp shr 1;
+    end;
+    if tmp mod 2 = 0 then
+      Field[j,i]:=clEmpty
+    else
+      Field[j,i]:=clBrick;
+  end;
+end;
+
+{ --- }
+
 Procedure CreateNewFile(var lf:LevelFile);
 var
-  A:GameField;
+  A:SnakeLevel;
 begin
 {$I-}
   ReWrite(lf);
@@ -47,7 +109,7 @@ end;
 
 Procedure AddEmptyLevel(var lf:LevelFile;CurrentPos:Word);
 var
-  NewLevel:GameField;
+  NewLevel:SnakeLevel;
 begin
   Seek(lf,FileSize(lf));
   CreateEmptyLevel(NewLevel);
@@ -57,10 +119,23 @@ end;
 
 { --- }
 
-Procedure SaveLevel(var lf:LevelFile;A:GameField);
+Procedure SaveLevel(var lf:LevelFile;var A:GameField);
+var
+  tmp:SnakeLevel;
 begin
   Seek(lf,FilePos(lf)-1);
-  Write(lf,A);
+  CompressLevel(A,tmp);
+  Write(lf,tmp);
+end;
+
+{ --- }
+
+Procedure LoadLevel(var lf:LevelFile;var A:GameField);
+var
+  tmp:SnakeLevel;
+begin
+  Read(lf,tmp);
+  DecompressLevel(tmp,A);
 end;
 
 END.

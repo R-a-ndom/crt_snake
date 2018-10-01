@@ -4,6 +4,8 @@
 
 debug_key="-g -dDEBUG"
 release_key="-o3"
+bin_dir="../bin/"
+ed_name="level_editor"
 
 act_debug_build_game=1
 act_debug_build_run_game=2
@@ -33,9 +35,8 @@ write_promt() {
   echo '[ Any key ] - exit'
 }
 
-remove_all_obj()
-{
-  rm *.o *.ppu
+remove_all_obj() {
+  rm $1/*.o $1/*.ppu
 }
 
 # ------------------
@@ -64,13 +65,14 @@ case $action_num in
 
   $act_debug_build_editor)
      rm *.o *.ppu ./level_editor 2>/dev/null
-     fpc $debug_key -olevel_editor editor_main.pas
+     fpc $debug_key -o$bin_dir$ed_name editor_main.pas
      ;;
 
 
   $act_debug_build_run_editor)
      rm *.o *.ppu ./level_editor 2>/dev/null
-     fpc $debug_key -olevel_editor editor_main.pas && ./level_editor
+     fpc $debug_key -o$bin_dir$ed_name editor_main.pas
+     $bin_dir$ed_name
      ;;
 
 # RELEASE - build
@@ -92,9 +94,12 @@ case $action_num in
 
   $act_remove_all_obj)
     echo -e "Deleting following files:\n"
-    echo $(ls *.o)
-    echo $(ls *.ppu)
-    remove_all_obj
+    echo $(ls -l *.o)
+    echo $(ls -l *.ppu)
+    echo $(ls -l $bin_dir*.o)
+    echo $(ls -l $bin_dir*.ppu)
+    remove_all_obj .
+    remove_all_obj $bin_dir
     echo -e "\nReady!"
     echo
     ;;
