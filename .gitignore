@@ -1,7 +1,8 @@
+
 # CRT_SNAKE
 # GIT ignoring file
 
-# editor's temp files
+# editor's temporary files
 
 *~
 
@@ -12,8 +13,8 @@
 # object files and binaries
 
 /bin/*
-#/src/level_editor
-#/src/*.o
-#/src/*.ppu
-/src/crt_snake.lvl
 
+#/src/level_editor
+/src/*.o
+/src/*.ppu
+/src/crt_snake.lvl

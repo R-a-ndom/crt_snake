@@ -1,11 +1,15 @@
 
-          $$    GO    @@<><><><>
-  $$                          <>
-        <><><>  CRT_SNAKE     <>
-  <>    <>  <>                <>
-  <><><><>  <><><><><><><><><><>
+       $$         GO     @@<><><><>
+                                 <>
+       <><><>  C R T _ S N A K E <>
+   <>  <>  <>                    <>
+   <><><>  <><><><><><><><><><><><>
 
 console arcade game using CRT unit
 writing on Free Pascal
 
-includes level editor
+Includes level editor
+
+(c) Alexey Sorokin
+
+alxy778@gmail.com, 2018

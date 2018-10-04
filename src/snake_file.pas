@@ -2,7 +2,7 @@
     --- EDITOR_FILE.PAS
 
   level file manipulations -
-  creating, deleting,moving etc
+  creating, deleting, moving etc...
 
   (c) Alexey Sorokin,  2018
 }
@@ -22,6 +22,8 @@ TYPE
 
 { --- procedures and functions --- }
 
+Procedure CreateEmptyLevel(var A:SnakeLevel);
+
 Procedure CreateNewFile(var lf:LevelFile);
 
 Procedure CompressLevel(var Field:GameField;var Level:SnakeLevel);
@@ -34,6 +36,7 @@ Procedure SaveLevel(var lf:LevelFile;var A:GameField);
 
 Procedure LoadLevel(var lf:LevelFile;var A:GameField);
 
+
 IMPLEMENTATION
 
 
@@ -43,53 +46,6 @@ var
 begin
   for i:=1 to LevelSizeOnDisk do
     A[i]:=0;
-end;
-
-{ compress field array into level array  }
-
-Procedure CompressLevel(var Field:GameField;var Level:SnakeLevel);
-var
-  i,j:Word;
-  UnitValue,Mask:LevelUnit;
-begin
-  for i:=0 to FieldHeight do
-  begin
-    UnitValue:=0;
-    For j:=0 to FieldWidth do
-    begin
-      if Field[j,i]=clBrick then
-        Mask:=1
-      else
-        Mask:=0;
-      UnitValue:=(UnitValue or Mask) shl 1;
-    end;
-    Level[i+1]:=UnitValue;
-  end;
-end;
-
-{ --- }
-
-Procedure DecompressLevel(var Level:SnakeLevel;var Field:GameField);
-var
-  i,j:Word;
-  tmp:LevelUnit;
-begin
-  for i:=0 to FieldHeight do
-  begin
-    tmp:=Level[i+1];
-    for j:=FieldWidth downto 1 do
-    begin
-      if tmp mod 2 = 0 then
-        Field[j,i]:=clEmpty
-      else
-        Field[j,i]:=clBrick;
-    tmp := tmp shr 1;
-    end;
-    if tmp mod 2 = 0 then
-      Field[j,i]:=clEmpty
-    else
-      Field[j,i]:=clBrick;
-  end;
 end;
 
 { --- }
@@ -103,6 +59,58 @@ begin
   CreateEmptyLevel(A);
   Write(lf,A);
 {$I+}
+end;
+
+{ compress field array into level array  }
+
+Function GetMask(A:CellValue):LevelRow;
+begin
+  if A=clBrick then
+    GetMask:=1
+  else
+    GetMask:=0;
+end;
+
+Procedure CompressLevel(var Field:GameField;var Level:SnakeLevel);
+var
+  i,j:Word;
+  LevelRowValue:LevelRow;
+begin
+  for i:=0 to FieldHeight do
+  begin
+    LevelRowValue:=0;
+    For j:=0 to FieldWidth-1 do
+      LevelRowValue:=(LevelRowValue or GetMask(Field[j,i])) shl 1;
+    LevelRowValue := LevelRowValue or GetMask(Field[FieldWidth,i]);
+    Level[i+1]:=LevelRowValue;
+  end;
+end;
+
+{ decompress level array into game field }
+
+Function CheckLastBit(A:LevelRow):CellValue;
+begin
+  if A mod 2 = 0 then
+    CheckLastBit:=clEmpty
+  else
+    CheckLastBit:=clBrick;
+end;
+
+Procedure DecompressLevel(var Level:SnakeLevel;var Field:GameField);
+var
+  i,j:Word;
+  tmp:LevelRow;
+begin
+  for i:=0 to FieldHeight do
+  begin
+    tmp:=Level[i+1];
+    for j:=FieldWidth downto 1 do
+    begin
+      Field[j,i]:=CheckLastBit(tmp);
+      tmp := tmp shr 1;
+    end;
+    Field[0,i]:=CheckLastBit(tmp);
+  end;
 end;
 
 { --- }
@@ -137,5 +145,7 @@ begin
   Read(lf,tmp);
   DecompressLevel(tmp,A);
 end;
+
+{ --- *** --- }
 
 END.

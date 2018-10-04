@@ -45,7 +45,7 @@ CONST
    (Text:'->';Value:mnuEdNavForward;
     MenuHint:' | Navigate - FORWARD'),
 
-   (Text:'ADD';Value:mnuEdAddToEnd;
+   (Text:'ADD TO END';Value:mnuEdAddToEnd;
     MenuHint:' | ADD clear level to the end of file'),
 
    (Text:'CLEAR';Value:mnuEdAddToEnd;
@@ -157,7 +157,7 @@ end;
 
 Procedure WriteHintLine(HintString:String);
 begin
-  TextBackground(edcol_HintLineBG);
+  TextBackground(edcol_MainBG);
   TextColor(edcol_HintLineText);
   GotoXY(1,ScreenHeight);
   Write(HintString);

@@ -18,6 +18,7 @@ act_remove_all_obj=0
 
 write_promt() {
   echo "Please, choose a number:"
+  echo
   echo "[    1    ] - DEBUG   - <    build    > GAME"
   echo "[    2    ] - DEBUG   - < build / run > GAME"
   echo
@@ -29,14 +30,13 @@ write_promt() {
   echo
   echo "[    7    ] - RELEASE - <    build    > ALL"
   echo
-  echo
   echo "[    0    ] - Deleting object files and binaries"
   echo
-  echo '[ Any key ] - exit'
+  echo '[ any key ] - exit'
 }
 
 remove_all_obj() {
-  rm $1/*.o $1/*.ppu
+  rm $1/*.o $1/*.ppu $1/*~ 2>/dev/null
 }
 
 # ------------------
@@ -44,9 +44,11 @@ remove_all_obj() {
 # ------------------
 
 echo -e "\nCRT_SNAKE - building a project\n"
+
 write_promt
 read -n 1 action_num
 echo
+
 case $action_num in
 
 # DEBUG - building a game
@@ -94,10 +96,8 @@ case $action_num in
 
   $act_remove_all_obj)
     echo -e "Deleting following files:\n"
-    echo $(ls -l *.o)
-    echo $(ls -l *.ppu)
-    echo $(ls -l $bin_dir*.o)
-    echo $(ls -l $bin_dir*.ppu)
+    echo $(ls *.o *.ppu *~)
+    echo $(ls $bin_dir*.o $bin_dir*.ppu)
     remove_all_obj .
     remove_all_obj $bin_dir
     echo -e "\nReady!"
@@ -106,5 +106,9 @@ case $action_num in
 
 # exit without actions
 
-  *) echo "Exit from script..." ;;
+  *) echo "Exit from script..."
+     ;;
 esac
+
+# --- end of scenery ---
+

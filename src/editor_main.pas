@@ -1,12 +1,11 @@
-{      --- LEVEL_EDITOR.PAS
+{      --- EDITOR_MAIN.PAS ---
 
        --- CRT_SNAKE LEVEL EDITOR ---
 console arcade game on Free pascal using CRT unit
 
 level editor main file
 
-(c) Alexey Sorokin, 2018
-}
+(c) Alexey Sorokin, 2018 }
 
 Program LevelEditor;
 
@@ -23,8 +22,6 @@ CONST
 
 { main file PROCEDURES AND FUNCTIONS }
 
-{ exit with error }
-
 {$ifdef DEBUG}
 Procedure WriteScreenParams(A:ScreenParams);
 begin
@@ -37,9 +34,11 @@ begin
 end;
 {$endif}
 
+{ exit with error }
+
 Procedure ErrorExit;
 begin
-  WriteLn(stderr,'Program will be closed...');
+  WriteLn(stderr,'Program will be closed.');
   Halt(1);
 end;
 
@@ -48,7 +47,7 @@ end;
 Procedure GetScreenParams(var A:ScreenParams);
 begin
   A.FieldLeftTop:=EvalMiddlePosLeftTop
-                       (FieldWidth*CellWidth + 1,FieldHeight+1);
+                  (FieldWidth*CellWidth + 1,FieldHeight+1);
   A.StLinePos   :=EvalStatusLinePoint(A.FieldLeftTop);
   A.YesNoLeftTop:=EvalMiddlePosLeftTop(YesNoMsgWidth,YesNoMsgHeight);
 end;
@@ -75,6 +74,7 @@ begin
     end;
   WriteLn(' Successfully. Levels in file:',FileSize(lf));
 {$I+}
+  Delay(1000);
   GetScreenParams(A);
 end;
 
@@ -89,6 +89,17 @@ begin
   WriteHintLine(hint_Main);
   DrawOneCell(A,Param.FieldLeftTop,CursorPos,true);
   WriteFullStatusLine(f,Param.StLinePos,CursorPos,Mode);
+end;
+
+{ confirm saving function }
+
+Procedure SaveIfNeed(var lf:LevelFile;var A:GameField;var Mode:EditorMode;YesNoLeftTop:ScrPos);
+begin
+  if ( (Mode.Modified=true) and
+     (YesNoSelect(YesNoLeftTop,yesno_ConfirmSave)=mnuConfirm) )
+  then
+    SaveLevel(lf,A);
+    Mode.Modified:=false;    
 end;
 
 { --- --- --- }
@@ -122,7 +133,7 @@ BEGIN
 
 { $ifdef DEBUG
   WriteScreenParams(ScrPar);
-$endif}
+ $ endif}
 
   DrawFieldBorder(ScrPar.FieldLeftTop);
   ProgramState:=mnuResume;
@@ -196,30 +207,37 @@ $endif}
 
       mnuEdNavBackward:  { viewing file - BACKWARD }
         begin
-          if ((FilePos(lvlf)>1) and
-             ((Mode.Modified=true) and
-              (YesNoSelect(ScrPar.YesNoLeftTop,yesno_ConfirmSave)=mnuConfirm))) then
+          if FilePos(lvlf)>1 then
           begin
+            SaveIfNeed(lvlf,EditedLevel,Mode,ScrPar.YesNoLeftTop);
             Seek(lvlf,FilePos(lvlf)-2);
-            SaveLevel(lvlf,EditedLevel);
-            Mode.Modified:=false;
-            ProgramState:=mnuResumeNeedReset;
-          end
-          else
-            ProgramState:=mnuResumeNeedReset;
-        end;
-
-      mnuEdNavForward:  { viewing file - FORWARD }
-        begin
-          if ( (FilePos(lvlf)<FileSize(lvlf) ) and ( (Mode.Modified=true)
-             and (YesNoSelect(ScrPar.YesNoLeftTop,yesno_ConfirmSave)=mnuConfirm))) then
-          begin
             LoadLevel(lvlf,EditedLevel);
             Mode.Modified:=false;
             ProgramState:=mnuResumeNeedReset;
           end
           else
+          begin
+            WarningAnimation;
+            WriteHintLine(hint_Main);
+            ProgramState:=mnuResume;
+          end;
+        end;
+
+      mnuEdNavForward:  { viewing file - FORWARD }
+        begin
+          if FilePos(lvlf)<FileSize(lvlf) then
+          begin
+            SaveIfNeed(lvlf,EditedLevel,Mode,ScrPar.YesNoLeftTop);
+            LoadLevel(lvlf,EditedLevel);
+            Mode.Modified:=false;
             ProgramState:=mnuResumeNeedReset;
+          end
+          else
+          begin
+            WarningAnimation;  
+            WriteHintLine(hint_Main);
+            ProgramState:=mnuResume;
+          end;
         end;
 
        mnuEdAddToEnd:  { ADDING a new level }
@@ -252,11 +270,10 @@ $endif}
         end;  }
       mnuExitRequest:
         begin
-          if ((YesNoSelect(ScrPar.YesNoLeftTop,yesno_Exit)<>mnuConfirm) and
-             ((Mode.Modified=true) and
-              (YesNoSelect(ScrPar.YesNoLeftTop,yesno_ConfirmSave)=mnuConfirm)))
-          then
-            ProgramState:=mnuResumeNeedReset;
+          if (YesNoSelect(ScrPar.YesNoLeftTop,yesno_Exit)<>mnuConfirm) then
+            ProgramState:=mnuResumeNeedReset
+          else
+            SaveIfNeed(lvlf,EditedLevel,Mode,ScrPar.YesNoLeftTop);
         end;
 
     end; { case }

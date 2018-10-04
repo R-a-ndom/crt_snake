@@ -72,9 +72,9 @@ TYPE
 
   { level recorded in file }
 
-  LevelUnit = LongWord;
+  LevelRow = LongWord;
 
-  SnakeLevel = array[1..LevelSizeOnDisk] of LevelUnit;
+  SnakeLevel = array[1..LevelSizeOnDisk] of LevelRow;
 
  { rectangle screen coordinate }
 
@@ -138,8 +138,6 @@ Function AbsCol(LeftTop:ScrPos; HPos:Word):Word;
 Function AbsRow(LeftTop:ScrPos; VPos:Word):Word;
 
 { creating an empty level array }
-
-Procedure CreateEmptyLevel(var A:GameField);
 
 
 IMPLEMENTATION
@@ -225,18 +223,6 @@ Function AbsRow(LeftTop:ScrPos; VPos:Word):Word;
 begin
   AbsRow:=LeftTop.Row + VPos;
 end;
-
-{ --- }
-
-Procedure CreateEmptyLevel(var A:GameField);
-var
-  i,j:Word;
-begin
-  for i:=0 to FieldWidth do
-   for j:=0 to FieldHeight do
-     A[i,j]:=clEmpty;
-end;
-
 
 { --- --- --- --- --- }
 

@@ -43,7 +43,6 @@ edcol_MenuUnactive=DarkGray;
 edcol_MenuUnsel=White;
 edcol_MenuSel=Yellow;
 
-edcol_HintLineBG=Black;
 edcol_HintLineText=Yellow;
 
 edcol_FieldBrick=Red;
@@ -70,6 +69,8 @@ Function Cell2String(s:CellValue):CellString;
 
 Procedure WriteFullStatusLine
     (var lf:LevelFile; StLineStart,CursorPos:ScrPos; Mode:EditorMode);
+    
+Procedure WarningAnimation;
 
 Procedure ShowHelpScreen(LeftTop:ScrPos);
 
@@ -110,17 +111,20 @@ begin
   inc(CursorPos.Row);
   TextBackground(edcol_MainBG);
   TextColor(edcol_StLineActive);
-  Write(CursorPos.Col:3,' :',CursorPos.Row:3);
+  Write(CursorPos.Col:2,' :',CursorPos.Row:2);
+  TextColor(edcol_StLineUnactive);
+  Write(' || ')
 end;
 
 { --- }
 
 Procedure WriteEditorMode(Mode:EditorMode);
 const
-  sign_NoModified=' |not mod';
-  sign_Modified  =' |  MOD  ';
-  sign_Wall = ' WALL  ';
-  sign_Erase= ' ERASE ';
+  sign_NoModified='-------- ';
+  sign_Modified  ='MODIFIED ';
+  sign_Wall = 'WALL  ';
+  sign_Erase= 'ERASE ';
+  sign_Manual='MANUAL';  
 begin
   if Mode.Modified then
   begin
@@ -133,17 +137,18 @@ begin
     Write(sign_NoModified);
   end;
 
-  if Mode.Wall then
-    TextColor(edcol_StLineActive)
-  else
-    TextColor(edcol_StLineUnactive);
-  Write(sign_Wall);
+  TextColor(edcol_StLineUnactive);
+  Write('| mode- ');
 
-  if Mode.Erase then
-    TextColor(edcol_StLineActive)
+  TextColor(edcol_StLineActive);
+  if Mode.Wall then
+    Write(sign_Wall)
   else
-    TextColor(edcol_StLineUnactive);
-  Write(sign_Erase);
+  if Mode.Erase then
+    Write(sign_Erase)
+  else
+    Write(sign_Manual);
+
 end;
 
 { --- }
@@ -152,13 +157,13 @@ Procedure WriteFileInfo(var lf:LevelFile);
 begin
   TextBackground(edcol_MainBG);
   TextColor(edcol_StLineUnactive);
-  Write('| Current : ');
+  Write('|| levels: CURRENT-');
   TextColor(edcol_StLineActive);
   Write(FilePos(lf):2);
   TextColor(edcol_StLineUnactive);
-  Write(' | All : ');
+  Write(' ALL-');
   TextColor(edcol_StLineActive);
-  Write(FileSize(lf):2);
+  Write(FileSize(lf):2,#32);
 end;
 
 { --- }
@@ -173,11 +178,30 @@ begin
   CursorOut;
 end;
 
+{ animation in screen bottom - if action is impossible }
+
+Procedure WarningAnimation;
+const
+  AnimationDelay=5;
+  PauseDelay=50;
+var
+  i:Word;
+begin
+  TextBackground(edcol_MainBG);
+  TextColor(edcol_HintLineText);
+  GotoXY(1,ScreenHeight);
+  for i:=1 to ScreenWidth-1 do
+  begin
+    Write('>');
+    Delay(AnimationDelay);
+  end;
+  Delay(PauseDelay);
+end;
+
 { --- HELP screen --- }
 
 Procedure ShowHelpScreen(LeftTop:ScrPos);
 begin
-
   TextColor(edcol_FieldBrick);
   DrawFieldBorder(LeftTop);
 
@@ -185,7 +209,11 @@ begin
   TextColor(edcol_HelpText);
   ClearRect(LeftTop, FieldWidth*CellWidth+1, FieldHeight);
   GotoXY(LeftTop.Col,LeftTop.Row);
-  Write('HELP screen');
+  Write('   CRT_SNAKE level editor - HELP screen');
+
+  LeftTop.Row:=LeftTop.Row+1;
+  GotoXY(LeftTop.Col,LeftTop.Row);
+  Write('------------------------------------------');
 
   LeftTop.Row:=LeftTop.Row+2;
   GotoXY(LeftTop.Col,LeftTop.Row);
@@ -193,7 +221,23 @@ begin
 
   LeftTop.Row:=LeftTop.Row+2;
   GotoXY(LeftTop.Col,LeftTop.Row);
-  Write('TAB - switch draw modes');
+  Write('TAB - switch draw modes:');
+
+  LeftTop.Row:=LeftTop.Row+1;
+  GotoXY(LeftTop.Col,LeftTop.Row);
+  Write('---------------------------');
+
+  LeftTop.Row:=LeftTop.Row+1;
+  GotoXY(LeftTop.Col,LeftTop.Row);
+  Write('DRAW mode - draws bricks');
+  
+  LeftTop.Row:=LeftTop.Row+1;
+  GotoXY(LeftTop.Col,LeftTop.Row);
+  Write('ERASE mode - erases all');
+
+  LeftTop.Row:=LeftTop.Row+1;
+  GotoXY(LeftTop.Col,LeftTop.Row);
+  Write('MANUAL mode - drawing brick/empty space on pressing SPACE BAR');
 
   LeftTop.Row:=LeftTop.Row+2;
   GotoXY(LeftTop.Col,LeftTop.Row);
