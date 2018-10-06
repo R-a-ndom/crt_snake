@@ -182,6 +182,7 @@ BEGIN
         end;
 
       kbdSpace: { SPACE BAR - drawing / erasing bricks }
+        if (not Mode.Wall) and (not Mode.Erase) then        
         begin
           ChangeCellUnderCursor(EditedLevel,ScrPar.FieldLeftTop,CursorPos);
           if not Mode.Modified then

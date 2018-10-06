@@ -85,7 +85,7 @@ Procedure MoveCursor
          (var A:GameField; var CursorPos:ScrPos;
           LeftTop:ScrPos; ColDir,RowDir:Integer);
 
-Procedure ChangeCellUnderCursor(var A:GameField; LeftTop,CursorPos:ScrPos);
+Procedure ChangeCellUnderCursor(var A:GameField; Mode:EditorMode; LeftTop,CursorPos:ScrPos);
 
 
 IMPLEMENTATION
@@ -329,19 +329,16 @@ end;
 
 { moving cursor during level editing }
 
-Procedure MoveCursor
-         (var A:GameField; var CursorPos:ScrPos;
-          LeftTop:ScrPos; ColDir,RowDir:Integer);
+Function GetCellValue(Mode:EditorMode);
 begin
-  DrawOneCell(A,LeftTop,CursorPos,false);
-  CursorPos.Col:=CursorPos.Col+ColDir;
-  CursorPos.Row:=CursorPos.Row+RowDir;
-  DrawOneCell(A,LeftTop,CursorPos,true);
+  if Mode.Wall then
+    GetCellValue:=clBrick
+  else
+  if Mode.Erase then
+    GetCellValue:=clEmpty;
 end;
 
-{ change cell under cursor after SPACE BAR pressing  }
-
-Procedure ChangeCellUnderCursor(var A:GameField;LeftTop,CursorPos:ScrPos);
+Procedure ChangeCellUnderCursor(var A:GameField; LeftTop,CursorPos:ScrPos);
 begin
   if A[CursorPos.Col,CursorPos.Row]=clBrick then
     A[CursorPos.Col,CursorPos.Row]:=clEmpty
