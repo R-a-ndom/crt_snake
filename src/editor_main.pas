@@ -99,7 +99,7 @@ begin
      (YesNoSelect(YesNoLeftTop,yesno_ConfirmSave)=mnuConfirm) )
   then
     SaveLevel(lf,A);
-    Mode.Modified:=false;    
+    Mode.Modified:=false;
 end;
 
 { --- --- --- }
@@ -150,28 +150,28 @@ BEGIN
       kbdUp:  { UP key }
         if CursorPos.Row>0 then
         begin
-          MoveCursor(EditedLevel,CursorPos,ScrPar.FieldLeftTop,0,-1);
+          MoveCursor(EditedLevel,CursorPos,Mode,ScrPar.FieldLeftTop,0,-1);
           WriteFullStatusLine(lvlf,ScrPar.StLinePos,CursorPos,Mode);
         end;
 
       kbdDown: { DOWN key}
         if CursorPos.Row<FieldHeight then
         begin
-          MoveCursor(EditedLevel,CursorPos,ScrPar.FieldLeftTop,0,1);
+          MoveCursor(EditedLevel,CursorPos,Mode,ScrPar.FieldLeftTop,0,1);
           WriteFullStatusLine(lvlf,ScrPar.StLinePos,CursorPos,Mode);
         end;
 
       kbdRight: { RIGHT key}
         if CursorPos.Col<FieldWidth then
         begin
-          MoveCursor(EditedLevel,CursorPos,ScrPar.FieldLeftTop,1,0);
+          MoveCursor(EditedLevel,CursorPos,Mode,ScrPar.FieldLeftTop,1,0);
           WriteFullStatusLine(lvlf,ScrPar.StLinePos,CursorPos,Mode);
         end;
 
       kbdLeft: { LEFT key }
         if CursorPos.Col>0 then
         begin
-          MoveCursor(EditedLevel,CursorPos,ScrPar.FieldLeftTop,-1,0);
+          MoveCursor(EditedLevel,CursorPos,Mode,ScrPar.FieldLeftTop,-1,0);
           WriteFullStatusLine(lvlf,ScrPar.StLinePos,CursorPos,Mode);
         end;
 
@@ -182,7 +182,7 @@ BEGIN
         end;
 
       kbdSpace: { SPACE BAR - drawing / erasing bricks }
-        if (not Mode.Wall) and (not Mode.Erase) then        
+        if (not Mode.Wall) and (not Mode.Erase) then
         begin
           ChangeCellUnderCursor(EditedLevel,ScrPar.FieldLeftTop,CursorPos);
           if not Mode.Modified then

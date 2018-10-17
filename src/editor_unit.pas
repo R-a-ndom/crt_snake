@@ -69,7 +69,7 @@ Function Cell2String(s:CellValue):CellString;
 
 Procedure WriteFullStatusLine
     (var lf:LevelFile; StLineStart,CursorPos:ScrPos; Mode:EditorMode);
-    
+
 Procedure WarningAnimation;
 
 Procedure ShowHelpScreen(LeftTop:ScrPos);
@@ -82,10 +82,13 @@ Procedure DrawOneCell
     (var A:GameField; LeftTop,CellPos:ScrPos; Selected:Boolean);
 
 Procedure MoveCursor
-         (var A:GameField; var CursorPos:ScrPos;
-          LeftTop:ScrPos; ColDir,RowDir:Integer);
+    (var A:GameField; var CursorPos:ScrPos;
+         Mode:EditorMode;LeftTop:ScrPos; ColDir,RowDir:Integer);
 
-Procedure ChangeCellUnderCursor(var A:GameField; Mode:EditorMode; LeftTop,CursorPos:ScrPos);
+Function GetCellValue(OldValue:CellValue;Mode:EditorMode):CellValue;
+
+Procedure ChangeCellUnderCursor
+     (var A:GameField; LeftTop,CursorPos:ScrPos);
 
 
 IMPLEMENTATION
@@ -124,7 +127,7 @@ const
   sign_Modified  ='MODIFIED ';
   sign_Wall = 'WALL  ';
   sign_Erase= 'ERASE ';
-  sign_Manual='MANUAL';  
+  sign_Manual='MANUAL';
 begin
   if Mode.Modified then
   begin
@@ -230,7 +233,7 @@ begin
   LeftTop.Row:=LeftTop.Row+1;
   GotoXY(LeftTop.Col,LeftTop.Row);
   Write('DRAW mode - draws bricks');
-  
+
   LeftTop.Row:=LeftTop.Row+1;
   GotoXY(LeftTop.Col,LeftTop.Row);
   Write('ERASE mode - erases all');
@@ -327,18 +330,41 @@ begin
   Write(Cell2String(A[CellPos.Col,CellPos.Row]));
 end;
 
-{ moving cursor during level editing }
+{ getting cell value depending on editor mode }
 
-Function GetCellValue(Mode:EditorMode);
+Function GetCellValue(OldValue:CellValue;Mode:EditorMode):CellValue;
 begin
   if Mode.Wall then
     GetCellValue:=clBrick
   else
   if Mode.Erase then
-    GetCellValue:=clEmpty;
+    GetCellValue:=clEmpty
+  else
+    GetCellValue:=OldValue;
 end;
 
-Procedure ChangeCellUnderCursor(var A:GameField; LeftTop,CursorPos:ScrPos);
+{moving cursor, drawing in depending on editor mode}
+
+Procedure MoveCursor
+    (var A:GameField; var CursorPos:ScrPos;
+         Mode:EditorMode;LeftTop:ScrPos; ColDir,RowDir:Integer);
+var
+  NewPos:ScrPos;
+begin
+  DrawOneCell(A,LeftTop,CursorPos,false);
+  with NewPos do begin
+    Col := CursorPos.Col + ColDir;
+    Row := CursorPos.Row + RowDir;
+  end;
+  A[NewPos.Col,NewPos.Row]:=GetCellValue(A[NewPos.Col,NewPos.Row],Mode);
+  CursorPos:=NewPos;
+  DrawOneCell(A,LeftTop,CursorPos,true);
+end;
+
+{ changing cell under cursor after SPACE BAR pressing }
+
+Procedure ChangeCellUnderCursor
+     (var A:GameField; LeftTop,CursorPos:ScrPos);
 begin
   if A[CursorPos.Col,CursorPos.Row]=clBrick then
     A[CursorPos.Col,CursorPos.Row]:=clEmpty
