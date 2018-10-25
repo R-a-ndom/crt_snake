@@ -14,7 +14,7 @@ USES
 
 TYPE
   ScreenParams=record
-    FieldLeftTop,StLinePos,YesNoLeftTop:ScrPos;
+    FieldLeftTop,StLinePos,YesNoLeftTop:Point;
   end;
 
 CONST
@@ -74,7 +74,7 @@ begin
     end;
   WriteLn(' Successfully. Levels in file:',FileSize(lf));
 {$I+}
-  Delay(1000);
+  Delay(500);
   GetScreenParams(A);
 end;
 
@@ -82,7 +82,7 @@ end;
 
 Procedure ResetEditorScreen
         (var f:LevelFile; var A:GameField;
-         Mode:EditorMode;CursorPos:ScrPos;Param:ScreenParams);
+         Mode:EditorMode;CursorPos:Point;Param:ScreenParams);
 begin
   WriteUnactiveMenu;
   DrawLevel(A,Param.FieldLeftTop);
@@ -93,13 +93,25 @@ end;
 
 { confirm saving function }
 
-Procedure SaveIfNeed(var lf:LevelFile;var A:GameField;var Mode:EditorMode;YesNoLeftTop:ScrPos);
+Procedure SaveIfNeed
+  (var lf:LevelFile;var A:GameField;var Mode:EditorMode;YesNoLeftTop:Point);
 begin
   if ( (Mode.Modified=true) and
      (YesNoSelect(YesNoLeftTop,yesno_ConfirmSave)=mnuConfirm) )
   then
     SaveLevel(lf,A);
     Mode.Modified:=false;
+end;
+
+{ clear editing level }
+
+Procedure ClearField(var A:GameField);
+var
+  i,j:Word;
+begin
+  for i:=0 to FieldHeight do
+    for j:=0 to FieldWidth do
+      A[j,i]:=clEmpty;
 end;
 
 { --- --- --- }
@@ -110,11 +122,12 @@ VAR
   Mode:EditorMode=(Modified:False;Wall:False;Erase:False);
   tmp_num:Word;
   ScrPar:ScreenParams;
-  CursorPos:ScrPos;
+  CursorPos:Point;
   sym:Char;
   ProgramState:MenuSelection;
 
-{ --------------------
+{
+  --------------------
   --- MAIN PROGRAM ---
   --------------------
 }
@@ -150,28 +163,28 @@ BEGIN
       kbdUp:  { UP key }
         if CursorPos.Row>0 then
         begin
-          MoveCursor(EditedLevel,CursorPos,Mode,ScrPar.FieldLeftTop,0,-1);
+          MoveCursor(EditedLevel,CursorPos,Mode,ScrPar.FieldLeftTop,move_Up);
           WriteFullStatusLine(lvlf,ScrPar.StLinePos,CursorPos,Mode);
         end;
 
       kbdDown: { DOWN key}
         if CursorPos.Row<FieldHeight then
         begin
-          MoveCursor(EditedLevel,CursorPos,Mode,ScrPar.FieldLeftTop,0,1);
+          MoveCursor(EditedLevel,CursorPos,Mode,ScrPar.FieldLeftTop,move_Down);
           WriteFullStatusLine(lvlf,ScrPar.StLinePos,CursorPos,Mode);
         end;
 
       kbdRight: { RIGHT key}
         if CursorPos.Col<FieldWidth then
         begin
-          MoveCursor(EditedLevel,CursorPos,Mode,ScrPar.FieldLeftTop,1,0);
+          MoveCursor(EditedLevel,CursorPos,Mode,ScrPar.FieldLeftTop,move_Right);
           WriteFullStatusLine(lvlf,ScrPar.StLinePos,CursorPos,Mode);
         end;
 
       kbdLeft: { LEFT key }
         if CursorPos.Col>0 then
         begin
-          MoveCursor(EditedLevel,CursorPos,Mode,ScrPar.FieldLeftTop,-1,0);
+          MoveCursor(EditedLevel,CursorPos,Mode,ScrPar.FieldLeftTop,move_Left);
           WriteFullStatusLine(lvlf,ScrPar.StLinePos,CursorPos,Mode);
         end;
 
@@ -224,6 +237,20 @@ BEGIN
           end;
         end;
 
+      mnuEdClearCurrent: { CLEARING current edited level }
+        begin
+          if (YesNoSelect(ScrPar.YesNoLeftTop,yesno_Clear)=mnuConfirm) then
+          begin
+            ClearField(EditedLevel);
+            ProgramState:=mnuResumeNeedReset;
+          end
+          else
+          begin
+            WriteHintLine(hint_Main);
+            ProgramState:=mnuResume;
+          end;
+        end;
+
       mnuEdNavForward:  { viewing file - FORWARD }
         begin
           if FilePos(lvlf)<FileSize(lvlf) then
@@ -235,7 +262,7 @@ BEGIN
           end
           else
           begin
-            WarningAnimation;  
+            WarningAnimation;
             WriteHintLine(hint_Main);
             ProgramState:=mnuResume;
           end;

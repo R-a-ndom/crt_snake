@@ -63,32 +63,32 @@ DrawingDelay=20;
 
 { procedures and functions }
 
-Function EvalStatusLinePoint(FieldLeftTop:ScrPos):ScrPos;
+Function EvalStatusLinePoint(FieldLeftTop:Point):Point;
 
 Function Cell2String(s:CellValue):CellString;
 
 Procedure WriteFullStatusLine
-    (var lf:LevelFile; StLineStart,CursorPos:ScrPos; Mode:EditorMode);
+    (var lf:LevelFile; StLineStart,CursorPos:Point; Mode:EditorMode);
 
 Procedure WarningAnimation;
 
-Procedure ShowHelpScreen(LeftTop:ScrPos);
+Procedure ShowHelpScreen(LeftTop:Point);
 
 Procedure SwitchModes(var Mode:EditorMode);
 
-Procedure DrawLevel(var A:GameField; LeftTop:ScrPos);
+Procedure DrawLevel(var A:GameField; LeftTop:Point);
 
 Procedure DrawOneCell
-    (var A:GameField; LeftTop,CellPos:ScrPos; Selected:Boolean);
+    (var A:GameField; LeftTop,CellPos:Point; Selected:Boolean);
 
 Procedure MoveCursor
-    (var A:GameField; var CursorPos:ScrPos;
-         Mode:EditorMode;LeftTop:ScrPos; ColDir,RowDir:Integer);
+    (var A:GameField; var CursorPos:Point;
+         Mode:EditorMode;LeftTop:Point; Dir:MovingDir);
 
 Function GetCellValue(OldValue:CellValue;Mode:EditorMode):CellValue;
 
 Procedure ChangeCellUnderCursor
-     (var A:GameField; LeftTop,CursorPos:ScrPos);
+     (var A:GameField; LeftTop,CursorPos:Point);
 
 
 IMPLEMENTATION
@@ -96,19 +96,18 @@ IMPLEMENTATION
 
 { initialization procedures and functions }
 
-Function EvalStatusLinePoint(FieldLeftTop:ScrPos):ScrPos;
+Function EvalStatusLinePoint(FieldLeftTop:Point):Point;
 var
-  tmp:ScrPos;
+  tmp:Point;
 begin
   tmp.Col:=FieldLeftTop.Col+1;
   tmp.Row:=FieldLeftTop.Row+FieldHeight+1;
   EvalStatusLinePoint:=tmp;
 end;
 
-
 { --- StatusLine procedures --- }
 
-Procedure WriteCursorCoords(CursorPos:ScrPos);
+Procedure WriteCursorCoords(CursorPos:Point);
 begin
   inc(CursorPos.Col);
   inc(CursorPos.Row);
@@ -125,7 +124,7 @@ Procedure WriteEditorMode(Mode:EditorMode);
 const
   sign_NoModified='-------- ';
   sign_Modified  ='MODIFIED ';
-  sign_Wall = 'WALL  ';
+  sign_Wall = ' WALL ';
   sign_Erase= 'ERASE ';
   sign_Manual='MANUAL';
 begin
@@ -172,7 +171,7 @@ end;
 { --- }
 
 Procedure WriteFullStatusLine
-        (var lf:LevelFile; StLineStart,CursorPos:ScrPos; Mode:EditorMode);
+        (var lf:LevelFile; StLineStart,CursorPos:Point; Mode:EditorMode);
 begin
   GotoXY(StLineStart.Col,StLineStart.Row);
   WriteCursorCoords(CursorPos);
@@ -203,7 +202,7 @@ end;
 
 { --- HELP screen --- }
 
-Procedure ShowHelpScreen(LeftTop:ScrPos);
+Procedure ShowHelpScreen(LeftTop:Point);
 begin
   TextColor(edcol_FieldBrick);
   DrawFieldBorder(LeftTop);
@@ -286,7 +285,7 @@ end;
 
 { fast drawing level after loading }
 
-Procedure DrawLevel(var A:GameField;LeftTop:ScrPos);
+Procedure DrawLevel(var A:GameField;LeftTop:Point);
 var
   i,j:Word;
 begin
@@ -312,9 +311,9 @@ end;
 { drawing one cell during level editing }
 
 Procedure DrawOneCell(var A:GameField;
-                   LeftTop,CellPos:ScrPos ; Selected:Boolean);
+                   LeftTop,CellPos:Point ; Selected:Boolean);
 var
-  AbsolutePos:ScrPos;
+  AbsolutePos:Point;
 begin
   if Selected then
     TextBackground(edcol_FieldCursor)
@@ -346,15 +345,15 @@ end;
 {moving cursor, drawing in depending on editor mode}
 
 Procedure MoveCursor
-    (var A:GameField; var CursorPos:ScrPos;
-         Mode:EditorMode;LeftTop:ScrPos; ColDir,RowDir:Integer);
+    (var A:GameField; var CursorPos:Point;
+         Mode:EditorMode;LeftTop:Point; Dir:MovingDir);
 var
-  NewPos:ScrPos;
+  NewPos:Point;
 begin
   DrawOneCell(A,LeftTop,CursorPos,false);
   with NewPos do begin
-    Col := CursorPos.Col + ColDir;
-    Row := CursorPos.Row + RowDir;
+    Col := CursorPos.Col + Dir.move_LR;
+    Row := CursorPos.Row + Dir.move_UD;
   end;
   A[NewPos.Col,NewPos.Row]:=GetCellValue(A[NewPos.Col,NewPos.Row],Mode);
   CursorPos:=NewPos;
@@ -364,7 +363,7 @@ end;
 { changing cell under cursor after SPACE BAR pressing }
 
 Procedure ChangeCellUnderCursor
-     (var A:GameField; LeftTop,CursorPos:ScrPos);
+     (var A:GameField; LeftTop,CursorPos:Point);
 begin
   if A[CursorPos.Col,CursorPos.Row]=clBrick then
     A[CursorPos.Col,CursorPos.Row]:=clEmpty

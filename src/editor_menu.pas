@@ -48,7 +48,7 @@ CONST
    (Text:'ADD TO END';Value:mnuEdAddToEnd;
     MenuHint:' | ADD clear level to the end of file'),
 
-   (Text:'CLEAR';Value:mnuEdAddToEnd;
+   (Text:'CLEAR';Value:mnuEdClearCurrent;
     MenuHint:' | CLEAR edited level'),
 
    (Text:'SAVE';Value:mnuEdSave;
@@ -87,13 +87,12 @@ CONST
   ' | ARROWS / TAB - change | ENTER - select';
   hint_SuccessAdd =
   ' | Successfully ADDED !';
+  hint_SuccessClear =
+  ' | Successfully CLEARED !';
   hint_SuccessSave =
   ' | Successfully SAVED !';
   hint_SuccessDel =
   ' | Successfully DELETED !';
-  hint_SuccessClear =
-  ' | Successfully CLEARED !';
-
 
 { procedures and functions }
 
@@ -103,7 +102,7 @@ Procedure WriteUnactiveMenu;
 
 Function EditorMenu:MenuSelection;
 
-Function YesNoSelect(MsgLeftTop:ScrPos;Caption:YesNoMsgString):MenuSelection;
+Function YesNoSelect(MsgLeftTop:Point;Caption:YesNoMsgString):MenuSelection;
 
 
 IMPLEMENTATION
@@ -113,9 +112,7 @@ CONST
 
 { editor menu constants }
 
-  MenuStart  : ScrPos=( Col : 3 ; Row : 1 );
-
-
+  MenuStart  : Point = ( Col : 3 ; Row : 1 );
 
   MenuUnselMark=' ';
   MenuSelBeginMark='[';
@@ -123,17 +120,12 @@ CONST
 
 { yes-no function constants  }
 
-  YesNoSureMsgRel:ScrPos=(Col :12 ; Row : 3);
-  YesNoButtonsRel:ScrPos=(Col : 9 ; Row : 5);
+  YesNoSureMsgRel:Point = (Col :12 ; Row : 3);
+  YesNoButtonsRel:Point = (Col : 9 ; Row : 5);
 
   SureMsg='Please confirm! ';
   YesMsg = ' Y E S ';
   NoMsg  = '  N O  ';
-
-
-{ hint line constants }
-
-
 
 { --- ---- ---- ---- ---- ---- ---- ---- ---- ---- --- }
 { ---  EDITOR_MENU unit procedures and functions   --- }
@@ -269,9 +261,9 @@ end;
 { --- YES and NO select function  --- }
 { --- --- --- --- --- --- --- --- --- }
 
-Function YesNoMsgAbsBegin(MsgLeftTop:ScrPos;Leng:Word):ScrPos;
+Function YesNoMsgAbsBegin(MsgLeftTop:Point;Leng:Word):Point;
 var
-  tmp:ScrPos;
+  tmp:Point;
 begin
   tmp.Col:=MsgLeftTop.Col+((yesNoMsgWidth-Leng) div 2)+1;
   tmp.Row:=MsgLeftTop.Row+2;
@@ -280,9 +272,9 @@ end;
 
 { write YES-NO message base }
 
-Procedure WriteYesNoMsgWindow(MsgLeftTop:ScrPos;Msg:YesNoMsgString);
+Procedure WriteYesNoMsgWindow(MsgLeftTop:Point;Msg:YesNoMsgString);
 var
-  MsgAbsPoint:ScrPos;
+  MsgAbsPoint:Point;
 begin
   TextBackground(edcol_YesNoBG);
   TextColor(edcol_YesNoMsgText);
@@ -297,7 +289,7 @@ end;
 
 { write buttons YES and NO }
 
-Procedure WriteYesNoButtons(MsgLeftTop:ScrPos;YesSelected:boolean);
+Procedure WriteYesNoButtons(MsgLeftTop:Point;YesSelected:boolean);
 begin
   GotoXY(MsgLeftTop.Col+YesNoButtonsRel.Col,
                                     MsgLeftTop.Row+YesNoButtonsRel.Row);
@@ -314,7 +306,8 @@ begin
 end;
 
 { --- }
-Function YesNoSelect(MsgLeftTop:ScrPos;Caption:YesNoMsgString):MenuSelection;
+
+Function YesNoSelect(MsgLeftTop:Point;Caption:YesNoMsgString):MenuSelection;
 var
   ch:Char;
   YesSelected:Boolean;

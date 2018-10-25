@@ -78,8 +78,14 @@ TYPE
 
  { rectangle screen coordinate }
 
-  ScrPos=record
+  Point=record
     Col,Row:Word
+  end;
+
+  { direction of moving cursor etc... }
+
+  MovingDir = record
+    move_UD,move_LR:Integer
   end;
 
   { string - game object }
@@ -104,11 +110,21 @@ TYPE
                     mnuExitRequest,    { ALL - exit}
                     mnuEdNavForward,   { EDITOR - navigation : forward }
                     mnuEdNavBackward,  { EDITOR - navigation : backward }
-                    mnuEdAddToEnd,     { EDITOR - add an empty level to the end }
+                    mnuEdAddToEnd,     { EDITOR - add an empty lvl to the end }
+                    mnuEdClearCurrent, { EDITOR - clear current level }
                     mnuEdSave,         { EDITOR - save level : replace }
                     mnuEdDelete,       { EDITOR - delete level }
                     mnuEdMovForward,   { EDITOR - move level : forward }
                     mnuEdMovBackward); { EDITOR - move level : backward }
+
+
+CONST
+
+  move_Left  : MovingDir = (move_UD: 0 ; move_LR:-1);
+  move_Right : MovingDir = (move_UD: 0 ; move_LR: 1);
+  move_Up    : MovingDir = (move_UD:-1 ; move_LR: 0);
+  move_Down  : MovingDir = (move_UD: 1 ; move_LR: 0);
+
 
 { PROCEDURES AND FUNCTIONS }
 
@@ -118,7 +134,7 @@ Procedure FillString(EndPoint:Word);
 
 { clearing rectangle screen area }
 
-Procedure ClearRect(LeftTop:ScrPos;DCol,DRow:Word);
+Procedure ClearRect(LeftTop:Point;DCol,DRow:Word);
 
 { moving cursor into screen angle }
 
@@ -126,16 +142,16 @@ Procedure CursorOut;
 
 { evaluating point of object drawing - middle of screen (in symbols) }
 
-Function EvalMiddlePosLeftTop(ObjWidth,ObjHeight:Word):ScrPos;
+Function EvalMiddlePosLeftTop(ObjWidth,ObjHeight:Word):Point;
 
 { drawing game field border  }
 
-Procedure DrawFieldBorder(LeftTop:ScrPos);
+Procedure DrawFieldBorder(LeftTop:Point);
 
 { evaluating cell's absolute screen position  }
 
-Function AbsCol(LeftTop:ScrPos; HPos:Word):Word;
-Function AbsRow(LeftTop:ScrPos; VPos:Word):Word;
+Function AbsCol(LeftTop:Point; HPos:Word):Word;
+Function AbsRow(LeftTop:Point; VPos:Word):Word;
 
 { creating an empty level array }
 
@@ -157,7 +173,7 @@ end;
 
 { --- }
 
-Procedure ClearRect(LeftTop:ScrPos;DCol,DRow:Word);
+Procedure ClearRect(LeftTop:Point;DCol,DRow:Word);
 var
   i:Integer;
 begin
@@ -178,9 +194,9 @@ end;
 
 { --- }
 
-Function EvalMiddlePosLeftTop(ObjWidth,ObjHeight:Word):ScrPos;
+Function EvalMiddlePosLeftTop(ObjWidth,ObjHeight:Word):Point;
 var
-  tmp:ScrPos;
+  tmp:Point;
 begin
   tmp.Col:=( ScreenWidth - ObjWidth ) div 2;
   tmp.Row:=(( ScreenHeight - ObjHeight) div 2) + 1;
@@ -189,7 +205,7 @@ end;
 
 { --- }
 
-Procedure DrawFieldBorder(LeftTop:ScrPos);
+Procedure DrawFieldBorder(LeftTop:Point);
 var
   i:Integer;
 begin
@@ -212,14 +228,14 @@ end;
 
 { --- }
 
-Function AbsCol(LeftTop:ScrPos; HPos:Word):Word;
+Function AbsCol(LeftTop:Point; HPos:Word):Word;
 begin
   AbsCol:=LeftTop.Col + HPos*CellWidth;
 end;
 
 { --- }
 
-Function AbsRow(LeftTop:ScrPos; VPos:Word):Word;
+Function AbsRow(LeftTop:Point; VPos:Word):Word;
 begin
   AbsRow:=LeftTop.Row + VPos;
 end;
