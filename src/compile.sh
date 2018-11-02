@@ -68,6 +68,10 @@ case $action_num in
   $act_debug_build_editor)
      rm *.o *.ppu ./level_editor 2>/dev/null
      fpc $debug_key -o$bin_dir$ed_name editor_main.pas
+     if [ $? != 0 ]
+     then
+       read -n 1 -p "Press any key, pls!"
+     fi
      ;;
 
 

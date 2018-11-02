@@ -103,6 +103,14 @@ begin
     Mode.Modified:=false;
 end;
 
+{ switch ON modified flag }
+
+Procedure SwitchModifiedOn(var Mode:EditorMode);
+begin
+  if not Mode.Modified then
+    Mode.Modified:=true;
+end;
+
 { clear editing level }
 
 Procedure ClearField(var A:GameField);
@@ -192,6 +200,22 @@ BEGIN
         begin
           SwitchModes(Mode);
           WriteFullStatusLine(lvlf,ScrPar.StLinePos,CursorPos,Mode);
+
+          if (Mode.Wall) and
+                 (EditedLevel[CursorPos.Col,CursorPos.Row]=clEmpty) then
+          begin
+            EditedLevel[CursorPos.Col,CursorPos.Row]:=clBrick;
+            SwitchModifiedON(Mode);
+          end;
+
+          if (Mode.Erase) and
+                 (EditedLevel[CursorPos.Col,CursorPos.Row]=clBrick) then
+          begin
+            EditedLevel[CursorPos.Col,CursorPos.Row]:=clEmpty;
+            SwitchModifiedON(Mode);
+          end;
+          DrawOneCell(EditedLevel,ScrPar.FieldLeftTop,CursorPos,true);
+          CursorOut;
         end;
 
       kbdSpace: { SPACE BAR - drawing / erasing bricks }
@@ -287,10 +311,10 @@ BEGIN
            end;
            ProgramState:=mnuResumeNeedReset;
          end;
-{      mnuEdDelete:
+      mnuEdDelete:
         begin
         end;
-      mnuEdMovBackward:
+{      mnuEdMovBackward:
         begin
         end;
       mnuEdMovForward:

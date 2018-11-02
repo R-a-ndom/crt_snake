@@ -1,4 +1,5 @@
-{   --- CRT_SNAKE LEVEL EDITOR
+{
+    --- CRT_SNAKE LEVEL EDITOR
     --- EDITOR_FILE.PAS
 
   level file manipulations -
@@ -36,6 +37,10 @@ Procedure SaveLevel(var lf:LevelFile;var A:GameField);
 
 Procedure LoadLevel(var lf:LevelFile;var A:GameField);
 
+Procedure DeleteLevel(var lf:LevelFile; Pos:Word);
+
+Procedure SwitchLevelWithNext(var lf:LevelFile;CurrentPos:Word);
+
 
 IMPLEMENTATION
 
@@ -71,6 +76,8 @@ begin
     GetMask:=0;
 end;
 
+{---}
+
 Procedure CompressLevel(var Field:GameField;var Level:SnakeLevel);
 var
   i,j:Word;
@@ -95,6 +102,8 @@ begin
   else
     CheckLastBit:=clBrick;
 end;
+
+{---}
 
 Procedure DecompressLevel(var Level:SnakeLevel;var Field:GameField);
 var
@@ -144,6 +153,41 @@ var
 begin
   Read(lf,tmp);
   DecompressLevel(tmp,A);
+end;
+
+{ deleting a level }
+
+Procedure DeleteLevel(var lf:LevelFile; Pos:Word);
+var
+  tmp_pos:Word;
+  tmp:SnakeLevel;
+begin
+  tmp_pos:=Pos;
+  While tmp_pos<FileSize(lf) do
+  begin
+    Seek(lf,tmp_pos);
+    Read(lf,tmp);
+    Seek(lf,tmp_pos-2);
+    Write(lf,tmp);
+    inc(tmp_pos);
+  end;
+  Seek(lf,tmp_pos-1);
+  Truncate(lf);
+  Seek(lf,Pos);
+end;
+
+{ switching two levels }
+
+Procedure SwitchLevelWithNext(var lf:LevelFile;CurrentPos:Word);
+var
+  current_tmp,next_tmp:SnakeLevel;
+begin
+  Seek(lf,CurrentPos);
+  Read(lf,next_tmp);
+  Read(lf,current_tmp);
+  Seek(lf,CurrentPos);
+  Write(lf,current_tmp);
+  Write(lf,next_tmp);
 end;
 
 { --- *** --- }

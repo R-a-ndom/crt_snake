@@ -43,6 +43,9 @@ edcol_MenuUnactive=DarkGray;
 edcol_MenuUnsel=White;
 edcol_MenuSel=Yellow;
 
+edcol_WarnBG=Yellow;
+edcol_Warn=Red;
+
 edcol_HintLineText=Yellow;
 
 edcol_FieldBrick=Red;
@@ -189,8 +192,8 @@ const
 var
   i:Word;
 begin
-  TextBackground(edcol_MainBG);
-  TextColor(edcol_HintLineText);
+  TextBackground(edcol_WarnBG);
+  TextColor(edcol_Warn);
   GotoXY(1,ScreenHeight);
   for i:=1 to ScreenWidth-1 do
   begin
@@ -310,8 +313,8 @@ end;
 
 { drawing one cell during level editing }
 
-Procedure DrawOneCell(var A:GameField;
-                   LeftTop,CellPos:Point ; Selected:Boolean);
+Procedure DrawOneCell
+         (var A:GameField;LeftTop,CellPos:Point ; Selected:Boolean);
 var
   AbsolutePos:Point;
 begin
