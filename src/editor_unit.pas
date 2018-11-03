@@ -86,9 +86,9 @@ Procedure DrawOneCell
 
 Procedure MoveCursor
     (var A:GameField; var CursorPos:Point;
-         Mode:EditorMode;LeftTop:Point; Dir:MovingDir);
+     var Mode:EditorMode;LeftTop:Point; Dir:MovingDir);
 
-Function GetCellValue(OldValue:CellValue;Mode:EditorMode):CellValue;
+Function GetCellValue(OldValue:CellValue;var Mode:EditorMode):CellValue;
 
 Procedure ChangeCellUnderCursor
      (var A:GameField; LeftTop,CursorPos:Point);
@@ -334,22 +334,34 @@ end;
 
 { getting cell value depending on editor mode }
 
-Function GetCellValue(OldValue:CellValue;Mode:EditorMode):CellValue;
+Function GetCellValue
+     (OldValue:CellValue;var Mode:EditorMode):CellValue;
+var
+  tmp:CellValue;
 begin
   if Mode.Wall then
-    GetCellValue:=clBrick
+  begin
+    tmp:=clBrick;
+    if (OldValue=clEmpty) and (Mode.Modified=false) then
+      Mode.Modified:=true;
+  end
   else
   if Mode.Erase then
-    GetCellValue:=clEmpty
+  begin
+    tmp:=clEmpty;
+    if (OldValue=clBrick)  and (Mode.Modified=false)then
+      Mode.Modified:=true;
+  end
   else
-    GetCellValue:=OldValue;
+    tmp:=OldValue;
+  GetCellValue:=tmp;
 end;
 
 {moving cursor, drawing in depending on editor mode}
 
 Procedure MoveCursor
     (var A:GameField; var CursorPos:Point;
-         Mode:EditorMode;LeftTop:Point; Dir:MovingDir);
+     var Mode:EditorMode;LeftTop:Point; Dir:MovingDir);
 var
   NewPos:Point;
 begin

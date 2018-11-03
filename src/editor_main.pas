@@ -18,7 +18,8 @@ TYPE
   end;
 
 CONST
-  LevelFileName='crt_snake.lvl';
+  LevelFileName = 'crt_snake.lvl';
+  MsgShowTime   = 300;
 
 { main file PROCEDURES AND FUNCTIONS }
 
@@ -74,7 +75,7 @@ begin
     end;
   WriteLn(' Successfully. Levels in file:',FileSize(lf));
 {$I+}
-  Delay(500);
+  Delay(MsgShowTime);
   GetScreenParams(A);
 end;
 
@@ -96,11 +97,14 @@ end;
 Procedure SaveIfNeed
   (var lf:LevelFile;var A:GameField;var Mode:EditorMode;YesNoLeftTop:Point);
 begin
-  if ( (Mode.Modified=true) and
-     (YesNoSelect(YesNoLeftTop,yesno_ConfirmSave)=mnuConfirm) )
-  then
+  if ((Mode.Modified=true) and
+     (YesNoSelect(YesNoLeftTop,yesno_ConfirmSave)=mnuConfirm)) then
+  begin
     SaveLevel(lf,A);
+    WriteHintLine(hint_SuccessSave);
+    Delay(MsgShowTime);
     Mode.Modified:=false;
+  end;
 end;
 
 { switch ON modified flag }
@@ -199,7 +203,6 @@ BEGIN
       kbdTab:  { TAB key }
         begin
           SwitchModes(Mode);
-          WriteFullStatusLine(lvlf,ScrPar.StLinePos,CursorPos,Mode);
 
           if (Mode.Wall) and
                  (EditedLevel[CursorPos.Col,CursorPos.Row]=clEmpty) then
@@ -208,13 +211,8 @@ BEGIN
             SwitchModifiedON(Mode);
           end;
 
-          if (Mode.Erase) and
-                 (EditedLevel[CursorPos.Col,CursorPos.Row]=clBrick) then
-          begin
-            EditedLevel[CursorPos.Col,CursorPos.Row]:=clEmpty;
-            SwitchModifiedON(Mode);
-          end;
           DrawOneCell(EditedLevel,ScrPar.FieldLeftTop,CursorPos,true);
+          WriteFullStatusLine(lvlf,ScrPar.StLinePos,CursorPos,Mode);
           CursorOut;
         end;
 
@@ -234,7 +232,7 @@ BEGIN
         end;
     end; { case }
 
-    case ProgramState of { editor menu values }
+    case ProgramState of { EDITOR MENU values }
 
       mnuShowHelpScreen:
         begin
@@ -307,10 +305,13 @@ BEGIN
            if (YesNoSelect(ScrPar.YesNoLeftTop,yesno_Save)=mnuConfirm) then
            begin
              SaveLevel(lvlf,EditedLevel);
+             WriteHintLine(hint_SuccessSave);
+             Delay(MsgShowTime);
              Mode.Modified:=false;
            end;
            ProgramState:=mnuResumeNeedReset;
          end;
+
       mnuEdDelete:
         begin
         end;

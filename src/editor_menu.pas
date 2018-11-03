@@ -45,14 +45,14 @@ CONST
    (Text:'->';Value:mnuEdNavForward;
     MenuHint:' | Navigate - FORWARD'),
 
+   (Text:'SAVE';Value:mnuEdSave;
+    MenuHint:' | SAVE edited level'),
+
    (Text:'ADD TO END';Value:mnuEdAddToEnd;
     MenuHint:' | ADD clear level to the end of file'),
 
    (Text:'CLEAR';Value:mnuEdClearCurrent;
     MenuHint:' | CLEAR edited level'),
-
-   (Text:'SAVE';Value:mnuEdSave;
-    MenuHint:' | SAVE edited level'),
 
    (Text:'DELETE';Value:mnuEdDelete;
     MenuHint:' | DELETE edited level'),
@@ -78,9 +78,9 @@ CONST
 { hintline messages }
 
   hint_Main  =
-  ' | ARROWS - move cursor | SPACE - draw/erase brick | ESC - editor menu |';
+  ' | ARROWS - move | SPACE - draw/erase (MANUAL mode)| TAB - modes | ESC - menu |';
   hint_Menu  =
-  ' | EDITOR MENU || LEFT/RIGHT - move cursor | ENTER - select | ESC - resume |';
+  ' | EDITOR MENU > LEFT/RIGHT - move cursor | ENTER - select | ESC - resume |';
   hint_HelpScreen =
   ' | HELP SCREEN - press any key to continue';
   hint_YesNoHelp =
