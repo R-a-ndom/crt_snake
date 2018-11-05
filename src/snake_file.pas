@@ -160,20 +160,22 @@ end;
 Procedure DeleteLevel(var lf:LevelFile; Pos:Word);
 var
   tmp_pos:Word;
-  tmp:SnakeLevel;
+  tmp_lvl:SnakeLevel;
 begin
   tmp_pos:=Pos;
   While tmp_pos<FileSize(lf) do
   begin
     Seek(lf,tmp_pos);
-    Read(lf,tmp);
-    Seek(lf,tmp_pos-2);
-    Write(lf,tmp);
+    Read(lf,tmp_lvl);
+    Seek(lf,tmp_pos-1);
+    Write(lf,tmp_lvl);
     inc(tmp_pos);
   end;
-  Seek(lf,tmp_pos-1);
+  if Pos=FileSize(lf) then
+    dec(Pos);
+  Seek(lf,FileSize(lf)-1);
   Truncate(lf);
-  Seek(lf,Pos);
+  Seek(lf,Pos-1);
 end;
 
 { switching two levels }

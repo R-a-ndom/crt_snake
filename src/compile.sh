@@ -70,6 +70,7 @@ case $action_num in
      fpc $debug_key -o$bin_dir$ed_name editor_main.pas
      if [ $? != 0 ]
      then
+       echo -e "\n---- ==== ----\n"
        read -n 1 -p "Press any key, pls!"
      fi
      ;;

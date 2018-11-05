@@ -204,17 +204,17 @@ begin
   GotoXY(MenuStart.Col,MenuStart.Row);
   While i<MenuPos do
   begin
-    WriteButton(EditorMenuContent[i].Text,
-                                    edcol_MenuSel,edcol_MenuUnsel,false);
+    WriteButton
+        (EditorMenuContent[i].Text,edcol_MenuSel,edcol_MenuUnsel,false);
     inc(i);
   end;
-  WriteButton(EditorMenuContent[MenuPos].Text,
-                                    edcol_MenuSel,edcol_MenuUnsel,true);
+  WriteButton
+      (EditorMenuContent[MenuPos].Text,edcol_MenuSel,edcol_MenuUnsel,true);
   inc(i);
   While i<=EditorMenuMax do
   begin
-    WriteButton(EditorMenuContent[i].Text,
-                                    edcol_MenuSel,edcol_MenuUnsel,false);
+    WriteButton
+      (EditorMenuContent[i].Text,edcol_MenuSel,edcol_MenuUnsel,false);
     inc(i);
   end;
   FillString(ScreenWidth);
@@ -279,12 +279,12 @@ begin
   TextBackground(edcol_YesNoBG);
   TextColor(edcol_YesNoMsgText);
   ClearRect(MsgLeftTop,YesNoMsgWidth+2,YesNoMsgHeight);
+  GotoXY(MsgLeftTop.Col+YesNoSureMsgRel.Col,MsgLeftTop.Row);
+  Write(SureMsg);
+
   MsgAbsPoint:=YesNoMsgAbsBegin(MsgLeftTop,Length(Msg));
   GotoXY(MsgAbsPoint.Col,MsgAbsPoint.Row);
   Write(Msg);
-  GotoXY(MsgLeftTop.Col+YesNoSureMsgRel.Col,
-                             MsgLeftTop.Row+YesNoSureMsgRel.Row);
-  Write(SureMsg);
 end;
 
 { write buttons YES and NO }

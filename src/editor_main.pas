@@ -19,7 +19,7 @@ TYPE
 
 CONST
   LevelFileName = 'crt_snake.lvl';
-  MsgShowTime   = 300;
+  MsgShowTime   = 1000;
 
 { main file PROCEDURES AND FUNCTIONS }
 
@@ -39,7 +39,8 @@ end;
 
 Procedure ErrorExit;
 begin
-  WriteLn(stderr,'Program will be closed.');
+  WriteLn(stderr,'Program has performed an illegal operation');
+  WriteLn(stderr,'and will be shut down. I''m so sad [ :-( ]');
   Halt(1);
 end;
 
@@ -130,6 +131,7 @@ end;
 
 VAR
   EditedLevel : GameField;
+  NewLevel    : SnakeLevel;
   lvlf:LevelFile;
   Mode:EditorMode=(Modified:False;Wall:False;Erase:False);
   tmp_num:Word;
@@ -259,7 +261,7 @@ BEGIN
           end;
         end;
 
-      mnuEdClearCurrent: { CLEARING current edited level }
+      mnuEdClearCurrent: { CLEARING current editing  level }
         begin
           if (YesNoSelect(ScrPar.YesNoLeftTop,yesno_Clear)=mnuConfirm) then
           begin
@@ -314,6 +316,25 @@ BEGIN
 
       mnuEdDelete:
         begin
+          if (YesNoSelect(ScrPar.YesNoLeftTop,yesno_Delete)=mnuConfirm) then
+          begin
+            DeleteLevel(lvlf,FilePos(lvlf));
+            If FileSize(lvlf)=0 then
+            begin
+              CreateEmptyLevel(NewLevel);
+              Write(lvlf,NewLevel);
+            end;
+            LoadLevel(lvlf,EditedLevel);
+            WriteHintLine(hint_SuccessDel);
+            Delay(MsgShowTime);
+            ProgramState:=mnuResumeNeedReset;
+          end
+          else
+          begin
+            WriteHintLine(hint_Main);
+            ProgramState:=mnuResume;
+          end;
+
         end;
 {      mnuEdMovBackward:
         begin
@@ -330,6 +351,7 @@ BEGIN
         end;
 
     end; { case }
+
     if ProgramState=mnuResumeNeedReset then
       begin
         ResetEditorScreen(lvlf,EditedLevel,Mode,CursorPos,ScrPar);
