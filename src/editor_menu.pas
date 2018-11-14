@@ -39,17 +39,17 @@ CONST
   ((Text:'HELP';Value:mnuShowHelpScreen;
     MenuHint:' | View HELP SCREEN'),
 
-   (Text:'<-';Value:mnuEdNavBackward;
+   (Text:'ADD NEW';Value:mnuEdAddToEnd;
+    MenuHint:' | ADD NEW (clear) level to the end of file'),
+
+   (Text:'<- VIEW';Value:mnuEdNavBackward;
     MenuHint:' | Navigate - BACKWARD'),
 
-   (Text:'->';Value:mnuEdNavForward;
+   (Text:'-> VIEW';Value:mnuEdNavForward;
     MenuHint:' | Navigate - FORWARD'),
 
    (Text:'SAVE';Value:mnuEdSave;
     MenuHint:' | SAVE edited level'),
-
-   (Text:'ADD TO END';Value:mnuEdAddToEnd;
-    MenuHint:' | ADD clear level to the end of file'),
 
    (Text:'CLEAR';Value:mnuEdClearCurrent;
     MenuHint:' | CLEAR edited level'),
@@ -57,10 +57,10 @@ CONST
    (Text:'DELETE';Value:mnuEdDelete;
     MenuHint:' | DELETE edited level'),
 
-   (Text:'<=';Value:mnuEdMovBackward;
+   (Text:'<= MOVE';Value:mnuEdMovBackward;
     MenuHint:' | SAVE and MOVE edited level BACKWARD'),
 
-   (Text:'=>';Value:mnuEdMovForward;
+   (Text:'=> MOVE';Value:mnuEdMovForward;
     MenuHint:' | SAVE and MOVE edited level FORWARD'),
 
    (Text:'EXIT';Value:mnuExitRequest;
@@ -112,7 +112,7 @@ CONST
 
 { editor menu constants }
 
-  MenuStart  : Point = ( Col : 3 ; Row : 1 );
+  MenuStart  : Point = ( Col : 2 ; Row : 1 );
 
   MenuUnselMark=' ';
   MenuSelBeginMark='[';
@@ -189,8 +189,18 @@ begin
   TextColor(edcol_MenuUnactive);
   GotoXY(MenuStart.Col,MenuStart.Row);
   For i:=1 to EditorMenuMax do
+  begin
     Write(MenuUnselMark,EditorMenuContent[i].Text,MenuUnselMark);
+  end;
   FillString(ScreenWidth-1);
+end;
+
+{ --- }
+
+Procedure WriteMenuItem
+     (Item:MenuItem;SelColor,UnselColor:Word;Selected:Boolean);
+begin
+  WriteButton(Item.Text,SelColor,UnselColor,Selected);
 end;
 
 { --- }
@@ -204,17 +214,17 @@ begin
   GotoXY(MenuStart.Col,MenuStart.Row);
   While i<MenuPos do
   begin
-    WriteButton
-        (EditorMenuContent[i].Text,edcol_MenuSel,edcol_MenuUnsel,false);
+    WriteMenuItem
+        (EditorMenuContent[i],edcol_MenuSel,edcol_MenuUnsel,false);
     inc(i);
   end;
-  WriteButton
-      (EditorMenuContent[MenuPos].Text,edcol_MenuSel,edcol_MenuUnsel,true);
+  WriteMenuItem
+      (EditorMenuContent[MenuPos],edcol_MenuSel,edcol_MenuUnsel,true);
   inc(i);
   While i<=EditorMenuMax do
   begin
-    WriteButton
-      (EditorMenuContent[i].Text,edcol_MenuSel,edcol_MenuUnsel,false);
+    WriteMenuItem
+      (EditorMenuContent[i],edcol_MenuSel,edcol_MenuUnsel,false);
     inc(i);
   end;
   FillString(ScreenWidth);

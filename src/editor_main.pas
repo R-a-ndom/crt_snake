@@ -314,12 +314,12 @@ BEGIN
            ProgramState:=mnuResumeNeedReset;
          end;
 
-      mnuEdDelete:
+      mnuEdDelete: { DELETING current level }
         begin
           if (YesNoSelect(ScrPar.YesNoLeftTop,yesno_Delete)=mnuConfirm) then
           begin
             DeleteLevel(lvlf,FilePos(lvlf));
-            If FileSize(lvlf)=0 then
+            If FileSize(lvlf)=0 then         {check empty file}
             begin
               CreateEmptyLevel(NewLevel);
               Write(lvlf,NewLevel);
@@ -336,12 +336,14 @@ BEGIN
           end;
 
         end;
-{      mnuEdMovBackward:
+      mnuEdMovBackward:
         begin
         end;
+
       mnuEdMovForward:
         begin
-        end;  }
+        end;
+
       mnuExitRequest:
         begin
           if (YesNoSelect(ScrPar.YesNoLeftTop,yesno_Exit)<>mnuConfirm) then
@@ -357,7 +359,10 @@ BEGIN
         ResetEditorScreen(lvlf,EditedLevel,Mode,CursorPos,ScrPar);
         ProgramState:=mnuResume;
         CursorOut;
-      end;
+      end
+    else
+      WriteHintLine(hint_Main);
+
   until ProgramState=mnuExitRequest;
 
 { program done }
